@@ -3,7 +3,7 @@ import LoginDTO from "@/core/dtos/LoginDTO";
 import AuthUserService from "@/core/services/AuthUserService";
 import useLoginViewModel from "@/core/viewmodels/auth/login-view-model";
 import { useRouter } from "expo-router";
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 import {
   Image,
@@ -32,7 +32,6 @@ const LoginScreen = () => {
     handleSubmit,
     errors,
     getValues,
-    reset,
   } = useLoginViewModel();
 
   const verifyExistingLogin = async (): Promise<boolean> => {
