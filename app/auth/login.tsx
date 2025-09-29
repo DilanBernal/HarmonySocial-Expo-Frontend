@@ -32,6 +32,7 @@ const LoginScreen = () => {
     control,
     handleSubmit,
     errors,
+    getValues,
     reset,
   } = useLoginViewModel();
 
@@ -53,8 +54,8 @@ const LoginScreen = () => {
 
   const finalSubmitHandler = handleSubmit(() => {
     const values: LoginDTO = {
-      userOrEmail: "",
-      password: "",
+      userOrEmail: getValues("userOrEmail"),
+      password: getValues("password"),
     };
     loginFunction(values)
       .pipe(
