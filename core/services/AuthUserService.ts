@@ -6,15 +6,16 @@ import { httpClient } from "../http";
 import { HttpResponse } from "../types/HttpResponse";
 
 export default class AuthUserService {
- getToken() {
-  return "";
- }
+  getToken() {
+    return "";
+  }
 
- login(data: LoginDTO): Observable<HttpResponse<LoginResponse>> {
-  return httpClient.post("/users/login", data);
- }
+  login(data: LoginDTO): Observable<HttpResponse<LoginResponse>> {
+    console.log("AuthUserService: login called with data:", data);
+    return httpClient.post("/users/login", data);
+  }
 
- register(data: RegisterDTO): Observable<HttpResponse<any>> {
-  return httpClient.post("users/register", data);
- }
+  register(data: RegisterDTO): Observable<HttpResponse<any>> {
+    return httpClient.post("users/register", data);
+  }
 }

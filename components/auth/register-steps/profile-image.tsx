@@ -16,43 +16,43 @@ const DEFAULT_AVATARS = {
   [UserInstrument.GUITAR]: [
     {
       key: 'avatar1',
-      src: require('../../../assets/img/profile-generig-img-1.png'),
+      src: require('@/assets/images/profile-generig-img-1.png'),
     },
     {
       key: 'avatar2',
-      src: require('../../../assets/img/profile-generig-img-2.png'),
+      src: require('@/assets/images/profile-generig-img-2.png'),
     },
     {
       key: 'avatar3',
-      src: require('../../../assets/img/profile-generig-img-3.png'),
+      src: require('@/assets/images/profile-generig-img-3.png'),
     },
   ],
   [UserInstrument.PIANO]: [
     {
       key: 'avatar4',
-      src: require('../../../assets/img/profile-generig-img-4.png'),
+      src: require('@/assets/images/profile-generig-img-4.png'),
     },
     {
       key: 'avatar5',
-      src: require('../../../assets/img/profile-generig-img-5.png'),
+      src: require('@/assets/images/profile-generig-img-5.png'),
     },
     {
       key: 'avatar6',
-      src: require('../../../assets/img/profile-generig-img-6.png'),
+      src: require('@/assets/images/profile-generig-img-6.png'),
     },
   ],
   [UserInstrument.BASS]: [
     {
       key: 'avatar7',
-      src: require('../../../assets/img/profile-generig-img-7.png'),
+      src: require('@/assets/images/profile-generig-img-7.png'),
     },
     {
       key: 'avatar8',
-      src: require('../../../assets/img/profile-generig-img-8.png'),
+      src: require('@/assets/images/profile-generig-img-8.png'),
     },
     {
       key: 'avatar1',
-      src: require('../../../assets/img/profile-generig-img-1.png'),
+      src: require('@/assets/images/profile-generig-img-1.png'),
     },
   ],
 };

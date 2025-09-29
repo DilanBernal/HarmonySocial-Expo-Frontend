@@ -2,8 +2,8 @@ import { EqBars } from "@/components/general/eq-bars";
 import LoginDTO from "@/core/dtos/LoginDTO";
 import AuthUserService from "@/core/services/AuthUserService";
 import useLoginViewModel from "@/core/viewmodels/auth/login-view-model";
-import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "expo-router";
+import React, { use, useEffect, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 import {
   Image,
@@ -20,9 +20,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { catchError, of } from "rxjs";
 
-type LoginScreenNavigationProp = any;
 const LoginScreen = () => {
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [focus, setFocus] = useState<"user" | "pass" | null>(null);
   const authService: AuthUserService = new AuthUserService();
@@ -41,10 +40,6 @@ const LoginScreen = () => {
 
     if (!token) return false;
 
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Main" }],
-    });
     return true;
   };
 
@@ -57,6 +52,7 @@ const LoginScreen = () => {
       userOrEmail: getValues("userOrEmail"),
       password: getValues("password"),
     };
+    console.log("Logging in with values:", values);
     loginFunction(values)
       .pipe(
         catchError((e) => {
@@ -65,12 +61,13 @@ const LoginScreen = () => {
         })
       )
       .subscribe((value) => {
+        console.log(value);
         if (value) {
-          console.log(value);
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Main" }],
-          });
+          // router.replace("/");
+          // navigation.reset({
+          //   index: 0,
+          //   routes: [{ name: "Main" }],
+          // });
         }
       });
   });
@@ -226,7 +223,7 @@ const LoginScreen = () => {
                     </LinearGradient>
 
                     <Pressable
-                      onPress={() => navigation.navigate("Register")}
+                      onPress={() => router.push("/auth/register")}
                       style={({ pressed }) => [
                         styles.btn,
                         styles.btnSecondary,
@@ -238,7 +235,7 @@ const LoginScreen = () => {
                   </View>
 
                   <Pressable
-                    onPress={() => navigation.navigate("ResetPassword")}
+                    onPress={() => router.push("/auth/forgot-password")}
                     style={styles.mt18}
                   >
                     <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>

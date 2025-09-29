@@ -14,11 +14,13 @@ import {
   Text,
   View,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MultiStep, Step } from 'react-native-multistep';
 
 
 export default function RegisterScreen() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -144,7 +146,7 @@ export default function RegisterScreen() {
               </MultiStep>
 
               <Pressable
-                onPress={() => { }/*navigation.goBack()*/}
+                onPress={() => router.back()}
                 style={styles.linkContainer}
                 accessibilityRole="button"
                 accessibilityLabel="Volver al inicio de sesión"
