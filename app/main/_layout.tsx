@@ -1,72 +1,66 @@
-import defaultColors from "@/assets/styles/colors/default";
-import { Ionicons } from "@expo/vector-icons";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text, View } from "react-native";
+import defaultColors from '@/assets/styles/colors/default';
+import { Ionicons } from '@expo/vector-icons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import FeedScreen from './(tabs)/feed';
+import ProfileScreen from './(tabs)/profile';
 
 const Tab = createBottomTabNavigator();
 
 const MainLayout = () => {
- return (
-  <Tab.Navigator
-   initialRouteName="home"
-   screenOptions={({ route }) => ({
-    sceneStyle: {
-     backgroundColor: defaultColors.background,
-    },
-    headerShown: false,
-    tabBarStyle: {
-     backgroundColor: "#111418",
-     borderColor: "#004cffff",
-     borderTopWidth: 2,
-     borderLeftWidth: 2,
-     borderRightWidth: 2,
-     borderTopLeftRadius: 100,
-     borderTopRightRadius: 100,
-    },
-    tabBarActiveTintColor: "#7C4DFF",
-    tabBarInactiveTintColor: "#9aa3b2",
-    tabBarIcon: ({ color, size, focused }) => {
-     const map: Record<string, string> = {
-      Feed: focused ? "home" : "home-outline",
-      home: focused ? "home" : "home-outline",
-      Buscar: focused ? "Buscar" : "Buscar-outline",
-      Subir: focused ? "add-circle" : "add-circle-outline", // ⬅️
-      Library: focused ? "musical-notes" : "musical-notes-outline",
-      Profile: focused ? "person" : "person-outline",
-     };
-     return (
-      <Ionicons name={map[route.name] as any} size={size} color={color} />
-     );
-    },
-   })}
-  >
-   <Tab.Screen
-    name="home"
-    component={tempComponent}
-    options={{ headerShown: false }}
-   />
-   <Tab.Screen name="home2" component={tempComponent2} />
-  </Tab.Navigator>
- );
+  return (
+    <Tab.Navigator
+      initialRouteName="feed"
+      screenOptions={({ route }) => ({
+        sceneStyle: {
+          backgroundColor: defaultColors.background,
+        },
+        headerShown: false,
+        tabBarStyle: {
+          borderTopWidth: 2,
+          elevation: 0,
+          backgroundColor: '#111418',
+          shadowColor: 'black',
+          shadowOpacity: 0.1,
+          shadowRadius: 5,
+          shadowOffset: { width: 0, height: -3 },
+        },
+        tabBarBackground: () => null,
+        tabBarActiveTintColor: '#7C4DFF',
+        tabBarInactiveTintColor: '#9aa3b2',
+      })}
+    >
+      <Tab.Screen
+        name="feed"
+        component={FeedScreen}
+        options={{
+          headerShown: false,
+          title: 'Feed',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={!focused ? 'home-outline' : 'home'}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="profile"
+        component={ProfileScreen}
+        options={{
+          headerShown: false,
+          title: 'Profile',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={!focused ? 'person-outline' : 'person'}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
 };
-
-const tempComponent = () => (
- <View>
-  <Text>lsdkfjsdlf</Text>
- </View>
-);
-
-const tempComponent2 = () => (
- <View>
-  <Text>lsdkfjsdlf</Text>
-  <Text>lsdkfjsdlf</Text>
-  <Text>lsdkfjsdlf</Text>
-  <Text>lsdkfjsdlf</Text>
-  <Text>lsdkfjsdlf</Text>
-  <Text>lsdkfjsdlf</Text>
-  <Text>lsdkfjsdlf</Text>
-  <Text>lsdkfjsdlf</Text>
- </View>
-);
 
 export default MainLayout;

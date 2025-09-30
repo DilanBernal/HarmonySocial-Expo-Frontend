@@ -5,7 +5,6 @@ import { RegisterFormData } from '../../../core/dtos/RegisterFormData';
 import { UserInstrument } from '@/core/models/data/User';
 import InstrumentOption from './instrument-option';
 
-
 export type instrumentOptionType = {
   key: UserInstrument;
   label: string;
@@ -72,7 +71,7 @@ export const FavoriteInstrumentStep: React.FC<FavoriteInstrumentStepProps> = ({
         numColumns={1}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
-        keyExtractor={item => item.key.toString()}
+        keyExtractor={(item) => item.key.toString()}
         renderItem={({ item }) => {
           const isSelected = favoriteInstrument === item.key;
 

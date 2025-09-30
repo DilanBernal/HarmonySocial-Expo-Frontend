@@ -18,7 +18,6 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MultiStep, Step } from 'react-native-multistep';
 
-
 export default function RegisterScreen() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -51,13 +50,13 @@ export default function RegisterScreen() {
               // });
             },
           },
-        ],
+        ]
       );
       reset();
     },
     (error: any) => {
       console.error('ocurrio un error', error);
-    },
+    }
   );
 
   return (

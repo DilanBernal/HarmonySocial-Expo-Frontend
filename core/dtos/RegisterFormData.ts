@@ -1,4 +1,4 @@
-import { UserInstrument } from "../models/data/User";
+import { UserInstrument } from '../models/data/User';
 
 export interface RegisterFormData {
   fullName: string;

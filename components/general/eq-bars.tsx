@@ -15,7 +15,7 @@ export const EqBars = ({
 }) => {
   const anims = useMemo(
     () => Array.from({ length: bars }, () => new Animated.Value(0)),
-    [bars],
+    [bars]
   );
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export const EqBars = ({
             easing: Easing.inOut(Easing.quad),
             useNativeDriver: false,
           }),
-        ]),
+        ])
       ).start();
     });
   }, [anims]);
@@ -60,7 +60,6 @@ export const EqBars = ({
     </View>
   );
 };
-
 
 export const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0b0c16' },

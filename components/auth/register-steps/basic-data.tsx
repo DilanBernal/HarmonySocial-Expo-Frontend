@@ -212,7 +212,6 @@ export const BasicDataStep: React.FC<BasicDataStepProps> = ({
   );
 };
 
-
 export const s = StyleSheet.create({
   // Estilos compartidos para componentes hijos
   label: {

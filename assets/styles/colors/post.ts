@@ -1,7 +1,7 @@
-import ColorsContainer from "@/core/types/styles/ColorContainer";
-import defaultColors from "./default";
+import ColorsContainer from '@/core/types/styles/ColorContainer';
+import defaultColors from './default';
 
 export const postColors: ColorsContainer = {
- background: "#171b23",
- border: defaultColors.borderDark,
+  background: '#171b23',
+  border: defaultColors.borderDark,
 };

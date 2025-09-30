@@ -111,7 +111,8 @@ export const ProfileImageStep: React.FC<ProfileImageStepProps> = ({
           <Image
             source={
               // Si es una key de avatar local, busca el objeto y usa su src
-              recommendedAvatars.find(a => a.key === selectedImage)?.src || { // Si no, asume que es una url remota
+              recommendedAvatars.find((a) => a.key === selectedImage)?.src || {
+                // Si no, asume que es una url remota
                 uri: selectedImage,
               }
             }

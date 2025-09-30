@@ -1,17 +1,17 @@
-import { Observable } from "rxjs";
-import { fromFetch } from "rxjs/fetch";
-import { catchError, switchMap } from "rxjs/operators";
-import { HttpResponse } from "../types/HttpResponse";
+import { Observable } from 'rxjs';
+import { fromFetch } from 'rxjs/fetch';
+import { catchError, switchMap } from 'rxjs/operators';
+import { HttpResponse } from '../types/HttpResponse';
 
 export default class HttpClient {
   private baseUrl: string;
   private defaultHeaders: Record<string, string>;
 
-  constructor(baseUrl: string = "") {
+  constructor(baseUrl: string = '') {
     this.baseUrl = baseUrl;
-    console.log(this.baseUrl)
+    console.log(this.baseUrl);
     this.defaultHeaders = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     };
   }
 
@@ -29,10 +29,9 @@ export default class HttpClient {
         ...options.headers,
       },
       body: options.body,
-
-      // ...options,
     };
 
+    console.log(fullUrl);
     return fromFetch(fullUrl, requestOptions).pipe(
       switchMap(async (response) => {
         const data = await response.json();
@@ -52,7 +51,7 @@ export default class HttpClient {
     url: string,
     headers?: Record<string, string>
   ): Observable<HttpResponse<T>> {
-    return this.request<T>("GET", url, { headers });
+    return this.request<T>('GET', url, { headers });
   }
 
   post<T>(
@@ -61,7 +60,7 @@ export default class HttpClient {
     headers?: Record<string, string>
   ): Observable<HttpResponse<T>> {
     console.log(body);
-    return this.request<T>("POST", url, {
+    return this.request<T>('POST', url, {
       body: JSON.stringify(body),
       headers,
     });
@@ -72,7 +71,7 @@ export default class HttpClient {
     body?: any,
     headers?: Record<string, string>
   ): Observable<HttpResponse<T>> {
-    return this.request<T>("PUT", url, {
+    return this.request<T>('PUT', url, {
       body: JSON.stringify(body),
       headers,
     });
@@ -82,14 +81,14 @@ export default class HttpClient {
     url: string,
     headers?: Record<string, string>
   ): Observable<HttpResponse<T>> {
-    return this.request<T>("DELETE", url, { headers });
+    return this.request<T>('DELETE', url, { headers });
   }
 
   setAuthToken(token: string): void {
-    this.defaultHeaders["Authorization"] = `Bearer ${token}`;
+    this.defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
 
   removeAuthToken(): void {
-    delete this.defaultHeaders["Authorization"];
+    delete this.defaultHeaders['Authorization'];
   }
 }
