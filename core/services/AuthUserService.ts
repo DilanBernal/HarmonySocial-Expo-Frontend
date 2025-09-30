@@ -1,3 +1,4 @@
+import * as SecureStore from 'expo-secure-store';
 import { Observable } from 'rxjs';
 import LoginDTO from '../dtos/LoginDTO';
 import { RegisterDTO } from '../dtos/RegisterDTO';
@@ -6,12 +7,11 @@ import { httpClient } from '../http';
 import { HttpResponse } from '../types/HttpResponse';
 
 export default class AuthUserService {
-  getToken() {
-    return '';
+  async getToken(): Promise<string | null> {
+    return await SecureStore.getItemAsync('user_token');
   }
 
   login(data: LoginDTO): Observable<HttpResponse<LoginResponse>> {
-    console.log('AuthUserService: login called with data:', data);
     return httpClient.post('/users/login', data);
   }
 

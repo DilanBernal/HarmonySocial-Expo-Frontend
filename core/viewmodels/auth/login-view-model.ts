@@ -1,13 +1,19 @@
 import LoginDTO from '@/core/dtos/LoginDTO';
+import LoginResponse from '@/core/dtos/responses/LoginResponse';
 import AuthUserService from '@/core/services/AuthUserService';
 import { loginValidationSchema } from '@/core/types/schemas/loginValidationSchema';
 import { yupResolver } from '@hookform/resolvers/yup';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { catchError, finalize, of } from 'rxjs';
 
 const useLoginViewModel = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const authService: AuthUserService = new AuthUserService();
+  const router = useRouter();
   const {
     control,
     reset,
@@ -23,7 +29,6 @@ const useLoginViewModel = () => {
   });
 
   const onSubmit = () => {
-    console.log('Sending register petition');
     setIsLoading(true);
 
     try {
@@ -31,20 +36,46 @@ const useLoginViewModel = () => {
         userOrEmail: getValues('userOrEmail'),
         password: getValues('password'),
       };
+      console.log(userLoginForm);
 
-      authService.login(userLoginForm).subscribe({
-        next: (response) => {
-          console.log('Registration successful:', response);
-          setIsLoading(false);
+      authService
+        .login(userLoginForm)
+        .pipe(
+          catchError((err) => {
+            console.log(err);
+            return of();
+          }),
+          finalize(() => {
+            setIsLoading(false);
+          })
+        )
+        .subscribe({
+          next: async (response) => {
+            const data: LoginResponse = response.data;
+            if (response) {
+              await SecureStore.setItemAsync('user_token', data.data.token);
+              const userToSave: {
+                username: string;
+                id: number;
+                profile_image: string;
+              } = {
+                ...data.data,
+              };
+              await AsyncStorage.setItem(
+                'user_data',
+                JSON.stringify(userToSave)
+              );
+              router.replace('/main/feed');
+            }
 
-          // Aquí podrías redirigir al login o mostrar mensaje de éxito
-          // navigation.navigate('Login');
-        },
-        error: (registrationError) => {
-          console.error('Registration error:', registrationError);
-          setIsLoading(false);
-        },
-      });
+            // Aquí podrías redirigir al login o mostrar mensaje de éxito
+            // navigation.navigate('Login');
+          },
+          error: (registrationError) => {
+            console.error('Registration error:', registrationError);
+            setIsLoading(false);
+          },
+        });
     } catch (syncError) {
       console.error('Sync registration error:', syncError);
       setIsLoading(false);

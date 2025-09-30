@@ -1,5 +1,4 @@
 import { EqBars } from '@/components/general/eq-bars';
-import LoginDTO from '@/core/dtos/LoginDTO';
 import AuthUserService from '@/core/services/AuthUserService';
 import useLoginViewModel from '@/core/viewmodels/auth/login-view-model';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,34 +6,35 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import {
+  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
-import { catchError, of } from 'rxjs';
 
 const LoginScreen = () => {
   const router = useRouter();
+  const [canLogin, setCanLogin] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focus, setFocus] = useState<'user' | 'pass' | null>(null);
   const authService: AuthUserService = new AuthUserService();
-  const loginFunction = authService.login;
 
-  const { control, handleSubmit, errors, getValues } = useLoginViewModel();
+  const { control, handleSubmit, errors, getValues, onSubmit, isLoading } =
+    useLoginViewModel();
 
-  const verifyExistingLogin = async (): Promise<boolean> => {
-    const token = authService.getToken();
+  const verifyExistingLogin = async () => {
+    const token = await authService.getToken();
 
-    if (!token) return false;
-
-    return true;
+    if (token) {
+      router.replace('/main/feed');
+    }
+    setCanLogin(true);
   };
 
   useEffect(() => {
@@ -42,28 +42,7 @@ const LoginScreen = () => {
   }, []);
 
   const finalSubmitHandler = handleSubmit(() => {
-    const values: LoginDTO = {
-      userOrEmail: getValues('userOrEmail'),
-      password: getValues('password'),
-    };
-    console.log('Logging in with values:', values);
-    loginFunction(values)
-      .pipe(
-        catchError((e) => {
-          console.error(e);
-          return of();
-        })
-      )
-      .subscribe((value) => {
-        console.log(value);
-        if (value) {
-          // router.replace("/");
-          // navigation.reset({
-          //   index: 0,
-          //   routes: [{ name: "Main" }],
-          // });
-        }
-      });
+    onSubmit();
   });
 
   const userRef = useRef<TextInput>(null);
@@ -71,184 +50,193 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.safe}>
-      <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={['#0c0f17', '#0c1222', '#0b0c16']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.bg}
-      >
-        {/* Vinilo decorativo */}
-        <View style={styles.vinylWrap} pointerEvents="none">
-          <View style={styles.vinylOuter} />
-          <View style={styles.vinylRing} />
-          <LinearGradient
-            colors={['#5b69f266', '#6D28D944']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.vinylInner}
+      {isLoading ||
+        (canLogin && (
+          <ActivityIndicator
+            size="large"
+            color={'blue'}
+            style={styles.chargeContainer}
           />
-          <View style={styles.vinylHole} />
-        </View>
-
-        {/* Equalizer detrás del card */}
-        <View style={styles.eqBehind}>
-          <EqBars />
-        </View>
-
-        <KeyboardAvoidingView
-          style={styles.kb}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        ))}
+      {canLogin && (
+        <LinearGradient
+          colors={['#0c0f17', '#0c1222', '#0b0c16']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.bg}
         >
-          <ScrollView contentContainerStyle={styles.scroll}>
-            <View style={styles.card}>
-              {/* Logo */}
-              <View style={styles.logoWrap}>
-                <Image
-                  source={require('@/assets/images/HarmonyImgNueva.png')}
-                  style={styles.logo}
-                  resizeMode="contain"
-                />
-              </View>
+          {/* Vinilo decorativo */}
+          <View style={styles.vinylWrap} pointerEvents="none">
+            <View style={styles.vinylOuter} />
+            <View style={styles.vinylRing} />
+            <LinearGradient
+              colors={['#5b69f266', '#6D28D944']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.vinylInner}
+            />
+            <View style={styles.vinylHole} />
+          </View>
 
-              <Text style={styles.title}>Harmony Social</Text>
-              <Text style={styles.subtitle}>
-                Tu mundo musical, comparte y descubre.
-              </Text>
+          {/* Equalizer detrás del card */}
+          <View style={styles.eqBehind}>
+            <EqBars />
+          </View>
 
-              <View>
-                <>
-                  <Text style={styles.label}>Username o Email</Text>
-                  <Controller
-                    control={control}
-                    name="userOrEmail"
-                    render={({ field, fieldState }) => (
-                      <View>
-                        <TextInput
-                          ref={userRef}
-                          placeholder="tu@correo.com"
-                          placeholderTextColor="#8A90A6"
-                          style={[
-                            styles.input,
-                            focus === 'user' ? styles.inputFocus : null,
-                          ]}
-                          onChangeText={field.onChange}
-                          onBlur={field.onBlur}
-                          onFocus={() => setFocus('user')}
-                          autoCapitalize="none"
-                          keyboardType="email-address"
-                          textContentType="username"
-                          value={field.value}
-                          returnKeyType="next"
-                          onSubmitEditing={() => passRef.current?.focus()}
-                        />
-                        {fieldState.error && (
-                          <Text style={styles.errorText}>
-                            {fieldState.error.message}
-                          </Text>
-                        )}
-                      </View>
-                    )}
-                  ></Controller>
+          <KeyboardAvoidingView
+            style={styles.kb}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            <ScrollView contentContainerStyle={styles.scroll}>
+              <View style={styles.card}>
+                {/* Logo */}
+                <View style={styles.logoWrap}>
+                  <Image
+                    source={require('@/assets/images/HarmonyImgNueva.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                  />
+                </View>
 
-                  <Text style={[styles.label, styles.mt14]}>Password</Text>
-                  <Controller
-                    control={control}
-                    name="password"
-                    render={({ field, fieldState }) => (
-                      <View>
-                        <View style={styles.inputAffixWrap}>
+                <Text style={styles.title}>Harmony Social</Text>
+                <Text style={styles.subtitle}>
+                  Tu mundo musical, comparte y descubre.
+                </Text>
+
+                <View>
+                  <>
+                    <Text style={styles.label}>Username o Email</Text>
+                    <Controller
+                      control={control}
+                      name="userOrEmail"
+                      render={({ field, fieldState }) => (
+                        <View>
                           <TextInput
-                            ref={passRef}
-                            placeholder="••••••••"
+                            ref={userRef}
+                            placeholder="tu@correo.com"
                             placeholderTextColor="#8A90A6"
                             style={[
                               styles.input,
-                              styles.inputWithAffix,
-                              focus === 'pass' ? styles.inputFocus : null,
-                              fieldState.isTouched && errors.password
-                                ? styles.inputError
-                                : null,
+                              focus === 'user' ? styles.inputFocus : null,
                             ]}
-                            value={field.value}
-                            secureTextEntry={!showPassword}
                             onChangeText={field.onChange}
-                            onBlur={() => {
-                              field.onBlur();
-                              setFocus(null);
-                            }}
-                            onFocus={() => setFocus('pass')}
+                            onBlur={field.onBlur}
+                            onFocus={() => setFocus('user')}
                             autoCapitalize="none"
-                            textContentType="password"
-                            returnKeyType="done"
-                            onSubmitEditing={() => finalSubmitHandler()}
+                            keyboardType="email-address"
+                            textContentType="username"
+                            value={field.value}
+                            returnKeyType="next"
+                            onSubmitEditing={() => passRef.current?.focus()}
                           />
-                          <Pressable
-                            style={styles.affix}
-                            onPress={() => setShowPassword((v) => !v)}
-                            android_ripple={{
-                              color: '#ffffff22',
-                              borderless: true,
-                            }}
-                          >
-                            <Text style={styles.affixText}>
-                              {showPassword ? 'Ocultar' : 'Mostrar'}
+                          {fieldState.error && (
+                            <Text style={styles.errorText}>
+                              {fieldState.error.message}
                             </Text>
-                          </Pressable>
+                          )}
                         </View>
-                        {fieldState.error && !!errors.password && (
-                          <Text style={styles.errorText}>
-                            {fieldState.error.message}
-                          </Text>
-                        )}
-                      </View>
-                    )}
-                  />
+                      )}
+                    ></Controller>
 
-                  <View style={styles.buttonsRow}>
-                    <LinearGradient
-                      colors={['#7C4DFF', '#4C63F2']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.btnGradient}
-                    >
+                    <Text style={[styles.label, styles.mt14]}>Password</Text>
+                    <Controller
+                      control={control}
+                      name="password"
+                      render={({ field, fieldState }) => (
+                        <View>
+                          <View style={styles.inputAffixWrap}>
+                            <TextInput
+                              ref={passRef}
+                              placeholder="••••••••"
+                              placeholderTextColor="#8A90A6"
+                              style={[
+                                styles.input,
+                                styles.inputWithAffix,
+                                focus === 'pass' ? styles.inputFocus : null,
+                                fieldState.isTouched && errors.password
+                                  ? styles.inputError
+                                  : null,
+                              ]}
+                              value={field.value}
+                              secureTextEntry={!showPassword}
+                              onChangeText={field.onChange}
+                              onBlur={() => {
+                                field.onBlur();
+                                setFocus(null);
+                              }}
+                              onFocus={() => setFocus('pass')}
+                              autoCapitalize="none"
+                              textContentType="password"
+                              returnKeyType="done"
+                              onSubmitEditing={() => finalSubmitHandler()}
+                            />
+                            <Pressable
+                              style={styles.affix}
+                              onPress={() => setShowPassword((v) => !v)}
+                              android_ripple={{
+                                color: '#ffffff22',
+                                borderless: true,
+                              }}
+                            >
+                              <Text style={styles.affixText}>
+                                {showPassword ? 'Ocultar' : 'Mostrar'}
+                              </Text>
+                            </Pressable>
+                          </View>
+                          {fieldState.error && !!errors.password && (
+                            <Text style={styles.errorText}>
+                              {fieldState.error.message}
+                            </Text>
+                          )}
+                        </View>
+                      )}
+                    />
+
+                    <View style={styles.buttonsRow}>
+                      <LinearGradient
+                        colors={['#7C4DFF', '#4C63F2']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.btnGradient}
+                      >
+                        <Pressable
+                          onPress={() => finalSubmitHandler()}
+                          style={({ pressed }) => [
+                            styles.btn,
+                            pressed ? styles.btnPressed : null,
+                          ]}
+                        >
+                          <Text style={styles.btnPrimaryText}>
+                            Iniciar sesión
+                          </Text>
+                        </Pressable>
+                      </LinearGradient>
+
                       <Pressable
-                        onPress={() => finalSubmitHandler()}
+                        onPress={() => router.push('/auth/register')}
                         style={({ pressed }) => [
                           styles.btn,
-                          pressed ? styles.btnPressed : null,
+                          styles.btnSecondary,
+                          pressed && styles.btnSecondaryPressed,
                         ]}
                       >
-                        <Text style={styles.btnPrimaryText}>
-                          Iniciar sesión
-                        </Text>
+                        <Text style={styles.btnSecondaryText}>Registrarse</Text>
                       </Pressable>
-                    </LinearGradient>
+                    </View>
 
                     <Pressable
-                      onPress={() => router.push('/auth/register')}
-                      style={({ pressed }) => [
-                        styles.btn,
-                        styles.btnSecondary,
-                        pressed && styles.btnSecondaryPressed,
-                      ]}
+                      onPress={() => router.push('/auth/forgot-password')}
+                      style={styles.mt18}
                     >
-                      <Text style={styles.btnSecondaryText}>Registrarse</Text>
+                      <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>
                     </Pressable>
-                  </View>
-
-                  <Pressable
-                    onPress={() => router.push('/auth/forgot-password')}
-                    style={styles.mt18}
-                  >
-                    <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>
-                  </Pressable>
-                </>
+                  </>
+                </View>
               </View>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </LinearGradient>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </LinearGradient>
+      )}
     </View>
   );
 };
@@ -315,15 +303,6 @@ export const styles = StyleSheet.create({
     top: '18%',
     alignItems: 'center',
     opacity: 0.7,
-  },
-  eqRow: {
-    flexDirection: 'row',
-    gap: 6,
-    alignItems: 'flex-end',
-  },
-  eqBar: {
-    width: 6,
-    borderRadius: 3,
   },
 
   /* Card */
@@ -407,5 +386,16 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     textDecorationLine: 'underline',
     fontWeight: '600',
+  },
+  chargeContainer: {
+    width: '100%',
+    position: 'absolute',
+    height: '100%',
+    zIndex: 9,
+    flex: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.40)',
+    backdropFilter: 'blur(20px)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
