@@ -62,14 +62,16 @@ const useLoginViewModel = () => {
                 ...data.data,
               };
               await AsyncStorage.setItem(
-                'user_data',
+                'user_login_data',
                 JSON.stringify(userToSave)
+              );
+              await authService.setAsyncUserData(
+                undefined,
+                undefined,
+                response.data
               );
               router.replace('/main/feed');
             }
-
-            // Aquí podrías redirigir al login o mostrar mensaje de éxito
-            // navigation.navigate('Login');
           },
           error: (registrationError) => {
             console.error('Registration error:', registrationError);

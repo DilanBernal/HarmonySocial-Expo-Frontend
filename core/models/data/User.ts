@@ -7,6 +7,7 @@ type User = {
   username: string;
   password: string;
   profile_image: string | ImageSourcePropType;
+  favorite_instrument: number | UserInstrument;
 };
 
 export default User;

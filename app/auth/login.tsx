@@ -1,4 +1,6 @@
 import { EqBars } from '@/components/general/eq-bars';
+import UserBasicData from '@/core/dtos/user/UserBasicData';
+import { HttpResponse } from '@/core/http';
 import AuthUserService from '@/core/services/AuthUserService';
 import useLoginViewModel from '@/core/viewmodels/auth/login-view-model';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -33,6 +35,15 @@ const LoginScreen = () => {
 
     if (token) {
       setCanLogin(false);
+      authService.getIdSyncFromAsyncStorage();
+      const id = authService.userId;
+      setTimeout(() => {
+        authService.getDataInfoFromApi().subscribe({
+          next: (x: HttpResponse<UserBasicData>) => {
+            console.log(x);
+          },
+        });
+      }, 200);
       router.replace('/main/feed');
     }
     setCanLogin(true);
@@ -42,9 +53,14 @@ const LoginScreen = () => {
     verifyExistingLogin();
   }, []);
 
-  const finalSubmitHandler = handleSubmit(() => {
-    onSubmit();
-  });
+  const finalSubmitHandler = handleSubmit(
+    () => {
+      onSubmit();
+    },
+    () => {
+      console.log('noje');
+    }
+  );
 
   const userRef = useRef<TextInput>(null);
   const passRef = useRef<TextInput>(null);
