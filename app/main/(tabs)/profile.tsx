@@ -1,5 +1,5 @@
 import ProfileImage from '@/components/general/profile-image';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AuthUserService from '@/core/services/AuthUserService';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -9,37 +9,33 @@ export default function ProfileScreen() {
   );
   const [username, setUsername] = useState<string>('');
   const [memberSince, setMemberSince] = useState<string>('');
+  const authUserService = new AuthUserService();
 
   useEffect(() => {
     const getUserData = async () => {
-      const userStorage = await AsyncStorage.getItem('userData');
+      const userStorage = await authUserService.getDataInfoFromAsyncStorage();
       console.log(userStorage);
       if (!userStorage) {
         onLogout();
         return;
       }
       try {
-        const userJson = JSON.parse(userStorage);
+        const userJson = userStorage;
         console.log(userJson);
         setProfileImage(userJson.profile_image);
         setUsername(userJson.username || '');
-        // Si tienes la fecha de registro, puedes setearla aquí
         setMemberSince(userJson.activeFrom || '');
-        // setMemberSince('2022'); // Hardcodeado por ahora
       } catch (error) {
         console.error(error);
         // Si hay error, forzar logout
-        onLogout();
+        // onLogout();
       }
     };
     getUserData();
   }, []);
 
   const onLogout = async () => {
-    await AsyncStorage.removeItem('user');
-    await AsyncStorage.removeItem('userData');
-    await AsyncStorage.removeItem('userInfo');
-    await AsyncStorage.removeItem('token');
+    await authUserService.logout();
     // rootNav.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 

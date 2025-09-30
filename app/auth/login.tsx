@@ -32,6 +32,7 @@ const LoginScreen = () => {
     const token = await authService.getToken();
 
     if (token) {
+      setCanLogin(false);
       router.replace('/main/feed');
     }
     setCanLogin(true);
@@ -51,7 +52,7 @@ const LoginScreen = () => {
   return (
     <View style={styles.safe}>
       {isLoading ||
-        (canLogin && (
+        (!canLogin && (
           <ActivityIndicator
             size="large"
             color={'blue'}
