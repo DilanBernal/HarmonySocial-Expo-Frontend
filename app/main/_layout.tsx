@@ -1,8 +1,11 @@
 import defaultColors from '@/assets/styles/colors/default';
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import CreatePostScreen from './(tabs)/(post)/create-post';
 import FeedScreen from './(tabs)/feed';
+import LibraryScreen from './(tabs)/library';
 import ProfileScreen from './(tabs)/profile';
+import SearchScreen from './(tabs)/search/search-screen';
 
 const Tab = createBottomTabNavigator();
 
@@ -44,6 +47,54 @@ const MainLayout = () => {
           ),
         }}
       />
+      <Tab.Screen
+        name="search"
+        component={SearchScreen}
+        options={{
+          headerShown: false,
+          title: 'Busqueda',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={!focused ? 'search-outline' : 'search'}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="post"
+        component={CreatePostScreen}
+        options={{
+          title: 'Crear nuevo post',
+          tabBarIcon({ color, size, focused }) {
+            return (
+              <Ionicons
+                name={!focused ? 'add-circle-outline' : 'add-circle'}
+                size={size}
+                color={color}
+              />
+            );
+          },
+        }}
+      />
+
+      <Tab.Screen
+        name="library"
+        component={LibraryScreen}
+        options={{
+          headerShown: false,
+          title: 'Library',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={!focused ? 'albums-outline' : 'albums'}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
       <Tab.Screen
         name="profile"
         component={ProfileScreen}
