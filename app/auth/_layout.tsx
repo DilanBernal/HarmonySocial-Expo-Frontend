@@ -10,6 +10,13 @@ const AuthLayout = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="register"
+        options={{
+          title: 'Registrarse',
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 };
