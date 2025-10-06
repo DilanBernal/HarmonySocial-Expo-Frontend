@@ -136,7 +136,7 @@ export class SearchService {
     // Try optimized search endpoints first
     const optimizedSearch = forkJoin({
       users: this.httpClient
-        .get<any>(`/users/search?q=${encodeURIComponent(q)}&limit=10`)
+        .get<any>(`/users/paginated?q=${encodeURIComponent(q)}&limit=10`)
         .pipe(catchError(() => of({ data: [] }))),
       artists: this.httpClient
         .get<any>(`/artists/search?q=${encodeURIComponent(q)}&limit=10`)
@@ -146,6 +146,7 @@ export class SearchService {
         .pipe(catchError(() => of({ data: [] }))),
     }).pipe(
       map(({ users, artists, songs }) => {
+        console.log(users);
         const uRows = pickRowsDeep(users.data).map(mapUser);
         const aRows = pickRowsDeep(artists.data).map(mapArtist);
         const sRows = pickRowsDeep(songs.data).map(mapSong);
@@ -166,7 +167,7 @@ export class SearchService {
     // Fallback to full search if optimized search fails
     const fallbackSearch = forkJoin({
       users: this.httpClient
-        .get<any>(`/app_user?limit=500`)
+        .get<any>(`/users/paginated?limit=500`)
         .pipe(
           catchError(() =>
             this.httpClient
@@ -191,6 +192,7 @@ export class SearchService {
         const usersRaw = pickRowsDeep(users.data);
         const artistsRaw = pickRowsDeep(artists.data);
         const songsRaw = pickRowsDeep(songs.data);
+        console.log(users);
 
         console.log('[Search] Fallback data fetched:', {
           users: usersRaw.length,
@@ -259,7 +261,7 @@ export class SearchService {
   // Búsquedas específicas por tipo
   searchUsers(query: string): Observable<HttpResponse<SearchUser[]>> {
     return this.httpClient
-      .get<any>(`/users/search?q=${encodeURIComponent(query)}&limit=20`)
+      .get<any>(`/users/paginated?q=${encodeURIComponent(query)}&limit=20`)
       .pipe(
         map((response) => ({
           ...response,
@@ -279,7 +281,7 @@ export class SearchService {
 
   searchArtists(query: string): Observable<HttpResponse<SearchArtist[]>> {
     return this.httpClient
-      .get<any>(`/artists/search?q=${encodeURIComponent(query)}&limit=20`)
+      .get<any>(`/artists/pagination?q=${encodeURIComponent(query)}&limit=20`)
       .pipe(
         map((response) => ({
           ...response,
