@@ -1,8 +1,8 @@
 import { Song } from '@/core/models/data/Song';
 import {
   ApiEnvelope,
-  songsService,
-} from '@/core/services/songs/GetSongService';
+  songQueryService,
+} from '@/core/services/songs/SongQueryService';
 import { Paginated } from '@/core/models/utils/Paginated';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subject, Subscription } from 'rxjs';
@@ -51,8 +51,8 @@ const useLibraryViewModel = () => {
         subscriptionRef.current.unsubscribe();
       }
 
-      subscriptionRef.current = songsService
-        .listMine(page, limit)
+      subscriptionRef.current = songQueryService
+        .listUserSongs(page, limit)
         .pipe(
           takeUntil(destroy$),
           finalize(() => {
@@ -92,7 +92,7 @@ const useLibraryViewModel = () => {
 
     // Clear cache to force fresh fetch (with error handling)
     try {
-      songsService.clearMyListCache();
+      songQueryService.clearUserSongsCache();
     } catch (error) {
       console.warn('[LibraryViewModel] Error clearing cache:', error);
       // Continue with refresh even if cache clear fails
@@ -103,8 +103,8 @@ const useLibraryViewModel = () => {
       subscriptionRef.current.unsubscribe();
     }
 
-    subscriptionRef.current = songsService
-      .listMine(1, 50)
+    subscriptionRef.current = songQueryService
+      .listUserSongs(1, 50)
       .pipe(
         takeUntil(destroy$),
         finalize(() => {
