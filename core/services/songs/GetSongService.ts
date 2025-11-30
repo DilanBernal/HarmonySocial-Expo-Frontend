@@ -1,4 +1,5 @@
 import { HttpClient, HttpResponse } from '@/core/http';
+import { Song, CreateSongDTO } from '@/core/models/data/Song';
 import { Paginated } from '@/core/models/utils/Paginated';
 import { Observable, of, Subject } from 'rxjs';
 import {
@@ -11,30 +12,10 @@ import {
   tap,
 } from 'rxjs/operators';
 
-export type Song = {
-  id: number;
-  title: string;
-  audioUrl: string;
-  createdAt: string;
-  artist?: string;
-  genre?: string;
-  duration?: number;
-  artwork?: string;
-};
-
-export type CreateSongDTO = {
-  title: string;
-  artist: string;
-  audioUrl: string;
-  genre?: string;
-  description?: string;
-  duration?: number;
-  bpm?: number;
-  decade?: number;
-  country?: string;
-};
-
 export type ApiEnvelope<T> = { success: boolean; data: T };
+
+// Re-export Song and CreateSongDTO for backwards compatibility
+export { Song, CreateSongDTO } from '@/core/models/data/Song';
 
 export class GetSongsService {
   private httpClient: HttpClient;

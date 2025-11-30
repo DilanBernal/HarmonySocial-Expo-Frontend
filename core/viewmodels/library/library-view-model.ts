@@ -1,6 +1,6 @@
+import { Song } from '@/core/models/data/Song';
 import {
   ApiEnvelope,
-  Song,
   songsService,
 } from '@/core/services/songs/GetSongService';
 import { Paginated } from '@/core/models/utils/Paginated';
