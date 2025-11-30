@@ -1,7 +1,4 @@
 import { EqBars } from '@/components/general/eq-bars';
-import UserBasicData from '@/core/dtos/user/UserBasicData';
-import { HttpResponse } from '@/core/http';
-import AuthUserService from '@/core/services/AuthUserService';
 import useLoginViewModel from '@/core/viewmodels/auth/login-view-model';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -25,13 +22,11 @@ const LoginScreen = () => {
   const [canLogin, setCanLogin] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focus, setFocus] = useState<'user' | 'pass' | null>(null);
-  const authService: AuthUserService = new AuthUserService();
 
   const {
     control,
     handleSubmit,
     errors,
-    getValues,
     onSubmit,
     isLoading,
     errorMessage,
@@ -39,20 +34,18 @@ const LoginScreen = () => {
     cleanup,
   } = useLoginViewModel();
 
-  const verifyExistingLogin = async () => {
-    const token = await authService.getToken();
+  const verifyExistingLogin = () => {
+    const token = "";
 
     if (token) {
       setCanLogin(false);
-      authService.getIdSyncFromAsyncStorage();
-      const id = authService.userId;
-      setTimeout(() => {
-        authService.getDataInfoFromApi().subscribe({
-          next: (x: HttpResponse<UserBasicData>) => {
-            console.log(x);
-          },
-        });
-      }, 200);
+      // authService.getIdSyncFromAsyncStorage();
+      // const id = authService.userId;
+      // authService.getDataInfoFromApi().subscribe({
+      //   next: (x: HttpResponse<UserBasicData>) => {
+      //     console.log(x);
+      //   },
+      // });
       router.replace('/main/feed');
     }
     setCanLogin(true);
@@ -67,16 +60,6 @@ const LoginScreen = () => {
     };
   }, []);
 
-  // Clear error when user starts typing - wrapped in useCallback
-  const handleFieldChange = useCallback(
-    (onChange: (value: string) => void) => (value: string) => {
-      if (errorMessage) {
-        clearError();
-      }
-      onChange(value);
-    },
-    [errorMessage, clearError]
-  );
 
   const finalSubmitHandler = handleSubmit(
     () => {
@@ -172,7 +155,7 @@ const LoginScreen = () => {
                               styles.input,
                               focus === 'user' ? styles.inputFocus : null,
                             ]}
-                            onChangeText={handleFieldChange(field.onChange)}
+                            onChangeText={field.onChange}
                             onBlur={field.onBlur}
                             onFocus={() => setFocus('user')}
                             autoCapitalize="none"
@@ -212,7 +195,7 @@ const LoginScreen = () => {
                               ]}
                               value={field.value}
                               secureTextEntry={!showPassword}
-                              onChangeText={handleFieldChange(field.onChange)}
+                              onChangeText={field.onChange}
                               onBlur={() => {
                                 field.onBlur();
                                 setFocus(null);

@@ -1,4 +1,5 @@
 import HttpClient from './HttpClient';
+import AuthInterceptor from './interceptors/AuthInterceptor';
 
 // Configuración de la API
 const API_BASE_URL =
@@ -6,6 +7,7 @@ const API_BASE_URL =
 
 // Instancia singleton
 export const httpClient = new HttpClient(API_BASE_URL);
+
 
 // Exportar también la clase por si necesitas crear instancias adicionales
 export type { HttpResponse } from '../types/HttpResponse';

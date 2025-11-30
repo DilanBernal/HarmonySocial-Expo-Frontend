@@ -1,6 +1,6 @@
 import LoginDTO from '@/core/dtos/LoginDTO';
 import { LoginResponseData } from '@/core/dtos/responses/LoginResponse';
-import AuthUserService from '@/core/services/AuthUserService';
+import AuthUserService from '@/core/services/seg/AuthUserService';
 import { loginValidationSchema } from '@/core/types/schemas/loginValidationSchema';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,47 +12,16 @@ import { Subject, Subscription } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
-// Error messages mapping
-const ERROR_MESSAGES: Record<string, string> = {
-  'HTTP Error: 401': 'Usuario o contraseña incorrectos.',
-  'HTTP Error: 403': 'Tu cuenta ha sido bloqueada. Contacta al soporte.',
-  'HTTP Error: 404': 'No se encontró el usuario.',
-  'HTTP Error: 500': 'Error del servidor. Intenta más tarde.',
-  'HTTP Error: 503': 'Servicio no disponible. Intenta más tarde.',
-  'Network Error': 'Error de conexión. Verifica tu internet.',
-  default: 'Ocurrió un error inesperado. Intenta nuevamente.',
-};
-
-/**
- * Maps error messages to user-friendly Spanish messages.
- */
-const mapErrorMessage = (errorMessage: string): string => {
-  for (const [key, value] of Object.entries(ERROR_MESSAGES)) {
-    if (errorMessage.includes(key)) {
-      return value;
-    }
-  }
-  return ERROR_MESSAGES.default;
-};
-
-/**
- * Login ViewModel - Manages the login screen state and logic following MVVM pattern.
- * Uses RxJS for reactive data handling.
- */
 const useLoginViewModel = () => {
-  // State
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Services
   const authService = useRef(new AuthUserService()).current;
   const router = useRouter();
 
-  // RxJS subjects for cleanup
   const destroy$ = useRef(new Subject<void>()).current;
   const subscriptionRef = useRef<Subscription | null>(null);
 
-  // Form handling with react-hook-form
   const {
     control,
     reset,
@@ -67,16 +36,10 @@ const useLoginViewModel = () => {
     delayError: 0,
   });
 
-  /**
-   * Clears the current error message.
-   */
   const clearError = useCallback(() => {
     setErrorMessage(null);
   }, []);
 
-  /**
-   * Performs the login API call with proper error handling.
-   */
   const performLogin = useCallback(() => {
     const userLoginForm: LoginDTO = {
       userOrEmail: getValues('userOrEmail'),
@@ -95,8 +58,9 @@ const useLoginViewModel = () => {
       .pipe(
         takeUntil(destroy$),
         catchError((error) => {
-          const errorMsg = mapErrorMessage(error.message);
-          console.error('[LoginViewModel] Login failed:', errorMsg);
+          console.log(error);
+          const errorMsg = error.message;
+          console.error('[LoginViewModel] Login failed:', error);
           return throwError(() => new Error(errorMsg));
         }),
         finalize(() => {
@@ -129,7 +93,7 @@ const useLoginViewModel = () => {
             );
 
             // Set additional user data
-            await authService.setAsyncUserData(undefined, undefined, response);
+            authService.setAsyncUserData(undefined, undefined, response);
 
             // Clear any errors and navigate
             setErrorMessage(null);

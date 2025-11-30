@@ -1,5 +1,5 @@
 import UserBasicData from '@/core/dtos/user/UserBasicData';
-import AuthUserService from '@/core/services/AuthUserService';
+import AuthUserService from '@/core/services/seg/AuthUserService';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subject, Subscription } from 'rxjs';
@@ -74,7 +74,7 @@ const useProfileViewModel = () => {
     setErrorMessage(null);
 
     // Get user ID from storage first
-    authUserService.getIdSyncFromAsyncStorage();
+    // authUserService.getIdSyncFromAsyncStorage();r
 
     // Small delay to ensure ID is loaded
     setTimeout(() => {

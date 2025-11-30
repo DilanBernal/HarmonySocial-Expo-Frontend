@@ -1,16 +1,13 @@
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import AuthUserService from '@/core/services/AuthUserService';
+import { HttpRequest } from '@/core/models/http/HttpRequest';
 
 const excludedRoutes = ['/users/login', '/users/register', '/users/forgot-password'];
 
-interface HttpRequest {
-  url: string;
-  headers: Record<string, string>;
-}
 
-export default function AuthInterceptor(request: HttpRequest): Observable<HttpRequest> {
-  const authService = new AuthUserService();
+export default function AuthInterceptor(request: HttpRequest, authService: AuthUserService): Observable<HttpRequest> {
+  // const authService = new AuthUserService();
 
   // Verificar si la ruta está excluida
   if (excludedRoutes.some(route => request.url.includes(route))) {

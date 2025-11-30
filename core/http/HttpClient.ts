@@ -1,11 +1,15 @@
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { HttpRequest } from '../models/http/HttpRequest';
-import { Observable } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import HttpError from '../models/http/HttpError';
+import { HttpResponse } from '../types/HttpResponse';
 
 export default class HttpClient {
   private baseUrl: string;
   private defaultHeaders: Record<string, string>;
+  private axiosInstance: AxiosInstance;
   private interceptors: ((req: HttpRequest) => Observable<HttpRequest>)[];
 
   constructor(baseUrl: string = '') {
@@ -13,83 +17,91 @@ export default class HttpClient {
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     };
+    this.axiosInstance = axios.create({
+      baseURL: this.baseUrl,
+      timeout: 10000,
+      headers: this.defaultHeaders
+    });
     this.interceptors = [];
+    this.setupInterceptors();
   }
+
+
+
+  private setupInterceptors(): void {
+    // Interceptor de request
+    this.axiosInstance.interceptors.request.use(
+      (config) => {
+        console.log(`🔄 Enviando request: ${config.method?.toUpperCase()} ${config.url}`);
+        return config;
+      },
+      (error) => {
+        console.error('❌ Error en request:', error);
+        return Promise.reject(error);
+      }
+    );
+
+
+    this.axiosInstance.interceptors.response.use(
+      (response) => {
+        console.log(`✅ Response recibido: ${response.status} ${response.config.url}`);
+        return response;
+      },
+      (error) => {
+        console.error('❌ Error en response:', error.response?.status, error.message);
+        return Promise.reject(error);
+      }
+    );
+  }
+
 
   addInterceptor(interceptor: (req: HttpRequest) => Observable<HttpRequest>): void {
     this.interceptors.push(interceptor);
   }
 
-  private applyInterceptors(request: HttpRequest): Observable<HttpRequest> {
-    return this.interceptors.reduce<Observable<HttpRequest>>(
-      (req$, interceptor) => req$.pipe(switchMap(interceptor)),
-      new Observable<HttpRequest>(observer => {
-        observer.next(request);
-        observer.complete();
-      })
-    );
+  // Métodos principales que devuelven Observables
+  public get<T>(url: string, config?: AxiosRequestConfig): Observable<T> {
+    return this.request<T>('GET', url, null, config);
   }
 
+  public post<T>(url: string, data?: any, config?: AxiosRequestConfig): Observable<T> {
+    return this.request<T>('POST', url, data, config);
+  }
+
+  public put<T>(url: string, data?: any, config?: AxiosRequestConfig): Observable<T> {
+    return this.request<T>('PUT', url, data, config);
+  }
+
+  public delete<T>(url: string, config?: AxiosRequestConfig): Observable<T> {
+    return this.request<T>('DELETE', url, null, config);
+  }
+
+  // Método genérico para todas las requests
   private request<T>(
     method: string,
     url: string,
-    options: RequestInit = {}
+    data?: any,
+    config?: AxiosRequestConfig
   ): Observable<T> {
-    const fullUrl = `${this.baseUrl}${url}`;
-
-    const request: HttpRequest = {
-      url: fullUrl,
-      headers: {
-        ...this.defaultHeaders,
-        ...(options.headers as Record<string, string>),
-      },
-      body: options.body,
+    const requestConfig: AxiosRequestConfig = {
       method,
+      url,
+      data,
+      ...config,
     };
 
-    return this.applyInterceptors(request).pipe(
-      switchMap(interceptedRequest => {
-        const { url, headers, body, method } = interceptedRequest;
-        const requestOptions: RequestInit = {
-          method,
-          headers,
-          body,
-        };
-
-        return fromFetch(url, requestOptions).pipe(
-          switchMap(async (response) => {
-            if (!response.ok) {
-              throw new Error(`HTTP Error: ${response.status}`);
-            }
-            return (await response.json()) as T;
-          }),
-          catchError((error) => {
-            throw new Error(`HTTP Error: ${error.message}`);
-          })
-        );
+    return from(this.axiosInstance.request<T>(requestConfig)).pipe(
+      map((response: AxiosResponse<T>) => response.data),
+      catchError((error) => {
+        // Aquí puedes transformar el error como necesites
+        throw this.handleError(error);
       })
     );
   }
 
-  get<T>(url: string, headers?: Record<string, string>): Observable<T> {
-    return this.request<T>('GET', url, { headers });
-  }
 
-  post<T>(url: string, body: any, headers?: Record<string, string>): Observable<T> {
-    return this.request<T>('POST', url, {
-      body: JSON.stringify(body),
-      headers,
-    });
-  }
-
-  put<T>(url: string, body?: any, headers?: Record<string, string>): Observable<T> {
-    return this.request<T>('PUT', url, {
-      body: JSON.stringify(body),
-      headers,
-    });
-  }
-
-  delete<T>(url: string, headers?: Record<string, string>): Observable<T> {
-    return this.request<T>('DELETE', url, { headers });
+  private handleError(error: any) {
+    console.log(error);
+    throw new Error(error);
   }
 }

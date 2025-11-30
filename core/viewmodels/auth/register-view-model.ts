@@ -1,6 +1,6 @@
 import { RegisterDTO } from '@/core/dtos/RegisterDTO';
 import { RegisterFormData } from '@/core/dtos/RegisterFormData';
-import AuthUserService from '@/core/services/AuthUserService';
+import AuthUserService from '@/core/services/seg/AuthUserService';
 import { completeValidationSchemas } from '@/core/types/schemas/stepValidationSchemas';
 import { UseRegisterViewModelReturn } from '@/core/types/viewmodels/RegisterViewModelTypes';
 import { transformToRegisterDTO } from '@/core/utils/transformToRegisterDto';

@@ -1,5 +1,4 @@
-export interface HttpResponse<T> {
+export interface HttpResponse<T> extends Response {
   data: T;
-  status: number;
   headers: Headers;
 }
