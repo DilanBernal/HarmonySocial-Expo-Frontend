@@ -1,12 +1,11 @@
 import LoginDTO from '@/core/dtos/LoginDTO';
 import LoginResponse from '@/core/dtos/responses/LoginResponse';
 import { httpClient } from '@/core/http';
-import { Observable, Subject, throwError } from 'rxjs';
+import { Observable, Subject, Subscription, throwError } from 'rxjs';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
-  map,
   switchMap,
   tap,
 } from 'rxjs/operators';
@@ -19,6 +18,7 @@ export class LoginService {
   private loginSubject = new Subject<LoginDTO>();
   private loginResults$ = new Subject<LoginResponse>();
   private errorSubject = new Subject<string>();
+  private loginStreamSubscription: Subscription | null = null;
 
   // Error messages mapping
   private static readonly ERROR_MESSAGES: Record<string, string> = {
@@ -39,7 +39,7 @@ export class LoginService {
    * Sets up the login stream with debounce to prevent multiple rapid API calls.
    */
   private setupLoginStream(): void {
-    this.loginSubject
+    this.loginStreamSubscription = this.loginSubject
       .pipe(
         debounceTime(500),
         distinctUntilChanged(
@@ -125,10 +125,16 @@ export class LoginService {
   }
 
   /**
-   * Cleans up all subjects to prevent memory leaks.
+   * Cleans up all subjects and subscriptions to prevent memory leaks.
    * Should be called when the service is no longer needed.
    */
   public destroy(): void {
+    // Unsubscribe from the login stream first
+    if (this.loginStreamSubscription) {
+      this.loginStreamSubscription.unsubscribe();
+      this.loginStreamSubscription = null;
+    }
+    // Then complete all subjects
     this.loginSubject.complete();
     this.loginResults$.complete();
     this.errorSubject.complete();

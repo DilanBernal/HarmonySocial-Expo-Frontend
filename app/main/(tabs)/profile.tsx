@@ -125,6 +125,5 @@ const s = StyleSheet.create({
     paddingVertical: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    margin: 'auto',
   },
 });

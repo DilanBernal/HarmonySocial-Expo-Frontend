@@ -82,11 +82,14 @@ const useSearchViewModel = () => {
 
     // Cleanup on unmount
     return () => {
-      destroy$.next();
-      destroy$.complete();
+      // First unsubscribe from any active subscriptions
       if (subscriptionRef.current) {
         subscriptionRef.current.unsubscribe();
+        subscriptionRef.current = null;
       }
+      // Then signal completion to stop any pending operations
+      destroy$.next();
+      destroy$.complete();
     };
   }, [searchSubject, destroy$]);
 

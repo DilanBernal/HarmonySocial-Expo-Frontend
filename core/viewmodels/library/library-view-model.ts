@@ -90,8 +90,13 @@ const useLibraryViewModel = () => {
     setIsRefreshing(true);
     isLoadingRef.current = true;
 
-    // Clear cache to force fresh fetch
-    songsService.clearMyListCache();
+    // Clear cache to force fresh fetch (with error handling)
+    try {
+      songsService.clearMyListCache();
+    } catch (error) {
+      console.warn('[LibraryViewModel] Error clearing cache:', error);
+      // Continue with refresh even if cache clear fails
+    }
 
     // Clean up previous subscription
     if (subscriptionRef.current) {
