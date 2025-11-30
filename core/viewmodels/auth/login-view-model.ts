@@ -10,11 +10,11 @@ import * as SecureStore from 'expo-secure-store';
 import { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Subject, Subscription } from 'rxjs';
-import { debounceTime, finalize, takeUntil } from 'rxjs/operators';
+import { finalize, takeUntil } from 'rxjs/operators';
 
 /**
  * Login ViewModel - Manages the login screen state and logic following MVVM pattern.
- * Uses RxJS for reactive data handling with debounce to prevent multiple API calls.
+ * Uses RxJS for reactive data handling.
  */
 const useLoginViewModel = () => {
   // State
@@ -27,7 +27,6 @@ const useLoginViewModel = () => {
 
   // RxJS subjects for cleanup
   const destroy$ = useRef(new Subject<void>()).current;
-  const loginClickSubject = useRef(new Subject<void>()).current;
   const subscriptionRef = useRef<Subscription | null>(null);
 
   // Form handling with react-hook-form
@@ -120,32 +119,21 @@ const useLoginViewModel = () => {
   }, [getValues, authService, router, destroy$]);
 
   /**
-   * Submit handler with debounce to prevent multiple rapid submissions.
-   * Uses RxJS debounceTime to ensure only one API call per 500ms.
+   * Submit handler for login.
+   * Uses isLoading state to prevent multiple submissions.
    */
   const onSubmit = useCallback(() => {
-    // Clear previous error
+    // Prevent multiple submissions while loading
+    if (isLoading) {
+      console.log('[LoginViewModel] Already loading, ignoring submit');
+      return;
+    }
+
+    // Clear previous error and start loading
     setErrorMessage(null);
     setIsLoading(true);
-
-    // Use debounce to prevent multiple rapid submissions
-    const debounceSubscription = loginClickSubject
-      .pipe(
-        debounceTime(500),
-        takeUntil(destroy$)
-      )
-      .subscribe(() => {
-        performLogin();
-      });
-
-    // Trigger the debounced login
-    loginClickSubject.next();
-
-    // Clean up debounce subscription after a short delay
-    setTimeout(() => {
-      debounceSubscription.unsubscribe();
-    }, 600);
-  }, [loginClickSubject, destroy$, performLogin]);
+    performLogin();
+  }, [isLoading, performLogin]);
 
   /**
    * Cleanup function to be called when the component unmounts.
