@@ -28,7 +28,7 @@ export default class AuthUserService {
     await AsyncStorage.removeItem(ASYNC_STORAGE_USER_DATA_KEY);
   }
 
-  login(data: LoginDTO): Observable<HttpResponse<LoginResponse>> {
+  login(data: LoginDTO): Observable<LoginResponse> {
     return httpClient.post('/users/login', data);
   }
 
