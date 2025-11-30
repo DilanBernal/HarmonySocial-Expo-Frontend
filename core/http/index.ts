@@ -2,8 +2,7 @@ import HttpClient from './HttpClient';
 
 // Configuración de la API
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ||
-  'https://fs571vhd-4666.use2.devtunnels.ms/api/';
+  process.env.EXPO_PUBLIC_API_URL;
 
 // Instancia singleton
 export const httpClient = new HttpClient(API_BASE_URL);
