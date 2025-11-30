@@ -1,8 +1,8 @@
 import ProfileImage from '@/components/general/profile-image';
-import AuthUserService from '@/core/services/AuthUserService';
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import useProfileViewModel from '@/core/viewmodels/profile/profile-view-model';
+import React from 'react';
 import {
+  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -10,88 +10,64 @@ import {
   Text,
   View,
 } from 'react-native';
-import { finalize } from 'rxjs';
 
+/**
+ * ProfileScreen - Uses ProfileViewModel for MVVM pattern compliance.
+ * All business logic is handled by the ViewModel with RxJS.
+ */
 export default function ProfileScreen() {
-  const [profileImage, setProfileImage] = useState<string | undefined>(
-    undefined
-  );
-  const [username, setUsername] = useState<string>('');
-  const [memberSince, setMemberSince] = useState<string>('');
-  const [learingPoints, setLearningPoints] = useState<number>(-1);
-  const authUserService = new AuthUserService();
-  const [refreshing, setRefreshing] = useState<boolean>(false);
+  // Use the ViewModel for all state and logic
+  const {
+    profileImage,
+    username,
+    memberSince,
+    learningPoints,
+    isLoading,
+    isRefreshing,
+    errorMessage,
+    refreshProfile,
+    logout,
+    clearError,
+  } = useProfileViewModel();
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    authUserService.getIdSyncFromAsyncStorage();
-    setTimeout(() => {
-      authUserService
-        .getDataInfoFromApi()
-        .pipe(
-          finalize(() => {
-            setRefreshing(false);
-          })
-        )
-        .subscribe({
-          next(value) {
-            setUsername(value.data.username);
-            setProfileImage(value.data.profileImage);
-            setMemberSince(String(value.data.activeFrom));
-            setLearningPoints(value.data.learningPoints);
-          },
-        });
-    }, 100);
-  };
-
-  useEffect(() => {
-    const getUserData = async () => {
-      const userStorage = await authUserService.getDataInfoFromAsyncStorage();
-      console.log(userStorage);
-      if (!userStorage) {
-        onLogout();
-        return;
-      }
-      try {
-        const userJson = userStorage;
-        console.log(userJson);
-        setProfileImage(userJson.profileImage);
-        setUsername(userJson.username || '');
-        setMemberSince(userJson.activeFrom || '');
-        setLearningPoints(userJson.learningPoints);
-      } catch (error) {
-        console.error(error);
-        // Si hay error, forzar logout
-        // onLogout();
-      }
-    };
-    getUserData();
-  }, []);
-
-  const onLogout = async () => {
-    await authUserService.logout();
-    router.replace('/auth/login');
-    // rootNav.reset({ index: 0, routes: [{ name: 'Login' }] });
-  };
+  if (isLoading && !isRefreshing) {
+    return (
+      <View style={s.loadingContainer}>
+        <ActivityIndicator size="large" color="#7C4DFF" />
+        <Text style={s.loadingText}>Cargando perfil...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
       contentContainerStyle={s.container}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={refreshProfile}
+          tintColor="#7C4DFF"
+        />
       }
     >
+      {/* Error message display */}
+      {errorMessage && (
+        <Pressable onPress={clearError} style={s.errorBanner}>
+          <Text style={s.errorText}>{errorMessage}</Text>
+        </Pressable>
+      )}
+
       <View style={s.innerContainer}>
         <ProfileImage image={profileImage} imageStyle={s.avatar} />
         <Text style={s.name}>{username || 'Usuario'}</Text>
         <Text style={s.learningPoints}>
-          Puntos de aprendizaje {learingPoints}
+          Puntos de aprendizaje {learningPoints}
         </Text>
         {memberSince && (
           <Text style={s.muted}>Miembro desde {memberSince}</Text>
         )}
 
-        <Pressable style={s.btn} onPress={onLogout}>
+        <Pressable style={s.btn} onPress={logout}>
           <Text style={s.btnText}>Cerrar sesión</Text>
         </Pressable>
       </View>
@@ -106,6 +82,32 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 40,
   },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#0b0c16',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#E6EAF2',
+    marginTop: 12,
+    fontSize: 14,
+  },
+  errorBanner: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    borderRadius: 8,
+    padding: 10,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    width: '90%',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 12,
+    textAlign: 'center',
+  },
   avatar: { width: 96, height: 96, borderRadius: 48, marginBottom: 12 },
   name: { color: '#E6EAF2', fontSize: 20, fontWeight: '800' },
   muted: { color: '#9AA3B2', marginTop: 4, marginBottom: 24 },
@@ -119,12 +121,9 @@ const s = StyleSheet.create({
   },
   btnText: { color: 'white', fontWeight: '800' },
   innerContainer: {
-    height: ' 100%',
     flex: 1,
     paddingVertical: 50,
     alignItems: 'center',
-    verticalAlign: 'middle',
-    alignContent: 'center',
-    margin: 'auto',
+    justifyContent: 'center',
   },
 });
