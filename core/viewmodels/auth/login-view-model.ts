@@ -1,5 +1,5 @@
 import LoginDTO from '@/core/dtos/LoginDTO';
-import LoginResponse from '@/core/dtos/responses/LoginResponse';
+import LoginResponse, { LoginResponseData } from '@/core/dtos/responses/LoginResponse';
 import AuthUserService from '@/core/services/AuthUserService';
 import { loginValidationSchema } from '@/core/types/schemas/loginValidationSchema';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -51,15 +51,18 @@ const useLoginViewModel = () => {
         )
         .subscribe({
           next: async (response) => {
-            const data: LoginResponse = response.data;
+            if (!response) return;
+            console.log(response)
+            const data: LoginResponseData = response.data;
+            console.log(data);
             if (response) {
-              await SecureStore.setItemAsync('user_token', data.data.token);
+              await SecureStore.setItemAsync('user_token', data.token);
               const userToSave: {
                 username: string;
                 id: number;
                 profile_image: string;
               } = {
-                ...data.data,
+                ...data,
               };
               await AsyncStorage.setItem(
                 'user_login_data',
@@ -68,7 +71,7 @@ const useLoginViewModel = () => {
               await authService.setAsyncUserData(
                 undefined,
                 undefined,
-                response.data
+                response
               );
               router.replace('/main/feed');
             }

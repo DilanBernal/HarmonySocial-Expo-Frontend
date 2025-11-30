@@ -5,7 +5,7 @@ export const loginValidationSchema = Yup.object({
   userOrEmail: Yup.string()
     .required('El username es obligatorio')
     .min(3, 'Mínimo 3 caracteres')
-    .max(20, 'Máximo 20 caracteres')
+    .max(50, 'Máximo 50 caracteres')
     .matches(
       /^[a-zA-Z0-9_*\-#$!|°.+]{3,20}$/,
       'El usuario o correo está en formato incorrecto'

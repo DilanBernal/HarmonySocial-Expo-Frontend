@@ -9,6 +9,9 @@ import UserBasicData from '../dtos/user/UserBasicData';
 import { httpClient } from '../http';
 import { HttpResponse } from '../types/HttpResponse';
 
+const SECURE_STORE_TOKEN_KEY = 'user_token';
+const ASYNC_STORAGE_USER_DATA_KEY = 'user_data';
+
 export default class AuthUserService {
   private id: number = -1;
 
@@ -17,15 +20,15 @@ export default class AuthUserService {
   }
 
   async getToken(): Promise<string | null> {
-    return await SecureStore.getItemAsync('user_token');
+    return await SecureStore.getItemAsync(SECURE_STORE_TOKEN_KEY);
   }
 
   async logout() {
-    await SecureStore.deleteItemAsync('user_token');
-    await AsyncStorage.removeItem('user_data');
+    await SecureStore.deleteItemAsync(SECURE_STORE_TOKEN_KEY);
+    await AsyncStorage.removeItem(ASYNC_STORAGE_USER_DATA_KEY);
   }
 
-  login(data: LoginDTO): Observable<HttpResponse<LoginResponse>> {
+  login(data: LoginDTO): Observable<LoginResponse> {
     return httpClient.post('/users/login', data);
   }
 
@@ -34,7 +37,7 @@ export default class AuthUserService {
   }
 
   async getDataInfoFromAsyncStorage() {
-    const userStorage = await AsyncStorage.getItem('user_data');
+    const userStorage = await AsyncStorage.getItem(ASYNC_STORAGE_USER_DATA_KEY);
     const userToken = await this.getToken();
     if (userStorage && userToken) {
       const dataParsed = JSON.parse(userStorage);
@@ -48,10 +51,15 @@ export default class AuthUserService {
   }
 
   getIdSyncFromAsyncStorage() {
-    AsyncStorage.getItem('user_data').then((x) => {
-      const id = JSON.parse(x!).id;
-      this.id = id;
-      return id;
+    AsyncStorage.getItem(ASYNC_STORAGE_USER_DATA_KEY).then((x) => {
+      try {
+        const id = JSON.parse(x!).id;
+        this.id = id;
+        return id;
+      } catch (error) {
+        console.log("el error esta en el JSON.parse creo", error);
+        return 0;
+      }
     });
   }
 
@@ -84,7 +92,7 @@ export default class AuthUserService {
             console.log(value);
             userData = { ...value.data };
             console.log(userData);
-            await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+            await AsyncStorage.setItem(ASYNC_STORAGE_USER_DATA_KEY, JSON.stringify(userData));
           },
         });
       return;

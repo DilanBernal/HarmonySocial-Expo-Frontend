@@ -1,59 +1,13 @@
 import User from '@/core/models/data/User';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import type { ImageSourcePropType } from 'react-native';
-import {
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 // import Post from '../../core/models/Post';
 import defaultColors from '@/assets/styles/colors/default';
 import ProfileImage from '@/components/general/profile-image';
 import { useRouter } from 'expo-router';
 
-const AVATAR: ImageSourcePropType = require('@/assets/images/yoxd.jpg');
-// 'https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=256&fit=crop';
-
-const FRIENDS: Omit<User, 'password' | 'email'>[] = [
-  {
-    id: 's1',
-    full_name: 'Chinacota',
-    profile_image: AVATAR,
-    username: '',
-  }, // local
-  {
-    id: 's2',
-    full_name: 'Sarah',
-    username: 'sarah',
-    profile_image:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=256&q=80',
-  },
-  {
-    id: 's3',
-    full_name: 'Daniel',
-    username: 'daniel',
-    profile_image:
-      'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=256&q=80',
-  },
-  {
-    id: 's4',
-    full_name: 'Leo',
-    username: 'leo',
-    profile_image:
-      'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=256&q=80',
-  },
-  {
-    id: 's5',
-    full_name: 'Nell Jimenez',
-    username: 'Lettie',
-    profile_image: 'avatar6',
-  },
-];
+const FRIENDS: Omit<User, 'password' | 'email'>[] = [];
 
 // const PLAYLISTS: Playlist[] = [
 //   {
@@ -94,14 +48,6 @@ const HomeHeader = () => {
     <View>
       <View style={s.topbar}>
         <Text style={s.logoText}>Harmony</Text>
-
-        {/* <Pressable
-     onPress={() => router.navigate("/min")}
-     android_ripple={{ color: "#ffffff22", borderless: true }}
-     style={{ borderRadius: 17 }}
-    >
-     {/* <Image source={AVATAR} style={s.avatar} /> 
-    </Pressable> */}
       </View>
 
       {/* Saludo */}
@@ -109,17 +55,6 @@ const HomeHeader = () => {
       <Text style={s.subtitle}>
         Explora música nueva y lo que comparten tus amigos.
       </Text>
-
-      {/* Search */}
-      <View style={s.searchWrap}>
-        <Ionicons name="search" size={20} color="#9AA3B2" />
-        <TextInput
-          placeholder="Buscar canciones, artistas o amigos"
-          placeholderTextColor="#8A90A6"
-          style={s.searchInput}
-        />
-        <Ionicons name="mic-outline" size={20} color="#9AA3B2" />
-      </View>
 
       {/* Historias */}
       <Text style={s.sectionTitle}>Historias</Text>
@@ -138,7 +73,6 @@ const HomeHeader = () => {
                 onPress={() => router.navigate('/main/profile')}
                 imageStyle={s.storyImg}
               />
-              {/* <Image source={item.profile_image} style={s.storyImg} /> */}
             </LinearGradient>
             <Text numberOfLines={1} style={s.storyName}>
               {item.full_name}
@@ -146,34 +80,6 @@ const HomeHeader = () => {
           </Pressable>
         )}
       />
-
-      {/* Playlists destacadas */}
-      {/* <Text style={[s.sectionTitle, { marginTop: 14 }]}>Para ti</Text>
-      <FlatList
-        data={PLAYLISTS}
-        keyExtractor={i => i.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 12 }}
-        ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-        renderItem={({ item }) => (
-          <Pressable style={s.plItem}>
-            <ImageBackground
-              source={item.cover}
-              imageStyle={s.plImage}
-              style={s.plImage}
-            >
-              <LinearGradient
-                colors={['#00000000', '#000000aa']}
-                style={s.plOverlay}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-              />
-              <Text style={s.plTitle}>{item.title}</Text>
-            </ImageBackground>
-          </Pressable>
-        )}
-      /> */}
     </View>
   );
 };
