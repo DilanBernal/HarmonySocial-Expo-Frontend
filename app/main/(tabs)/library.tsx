@@ -1,68 +1,34 @@
-import React, { useEffect, useRef, useState } from 'react';
+import useLibraryViewModel from '@/core/viewmodels/library/library-view-model';
+import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  RefreshControl,
   Text,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-// import { playSongByBlob, songRequest } from '@/core/player/playerSetup';
-import { Song, songsService } from '@/core/services/songs/GetSongService';
 
+/**
+ * LibraryScreen - Uses LibraryViewModel for MVVM pattern compliance.
+ * All business logic is handled by the ViewModel with RxJS.
+ */
 export default function LibraryScreen() {
   const insets = useSafeAreaInsets();
-  const [items, setItems] = useState<Song[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
 
-  const isLoadingRef = useRef(false);
+  // Use the ViewModel for all state and logic
+  const {
+    songs,
+    isLoading,
+    isRefreshing,
+    errorMessage,
+    isLibraryEmpty,
+    refreshLibrary,
+    retry,
+  } = useLibraryViewModel();
 
-  useEffect(() => {
-    console.log('[LibraryScreen] useEffect - Initial mount, calling load()');
-    load();
-  }, []);
-
-  const load = () => {
-    if (isLoadingRef.current) {
-      console.log('[LibraryScreen] Already loading, skipping...');
-      return;
-    }
-
-    console.log('[LibraryScreen] Starting load...');
-    isLoadingRef.current = true;
-    setLoading(true);
-    setErr(null);
-    try {
-      const subscription = songsService.listMine(1, 50).subscribe({
-        next: (response: any) => {
-          console.log('Library response:', response);
-          const songs = response?.data?.data?.rows ?? [];
-
-          songs.forEach((song: Song) => {
-            console.log('Song:', song);
-          });
-
-          setItems(songs);
-          setLoading(false);
-          isLoadingRef.current = false;
-        },
-        error: (error: any) => {
-          console.error('Library error:', error);
-          setErr(error?.message ?? 'No se pudo cargar tu biblioteca');
-          setLoading(false);
-          isLoadingRef.current = false;
-        },
-      });
-    } catch (e: any) {
-      console.error(e);
-      setErr(e?.message ?? 'No se pudo cargar tu biblioteca');
-      setLoading(false);
-      isLoadingRef.current = false;
-    }
-  };
-
-  if (loading) {
+  if (isLoading && !isRefreshing) {
     return (
       <View
         style={{
@@ -73,7 +39,7 @@ export default function LibraryScreen() {
           paddingTop: insets.top,
         }}
       >
-        <ActivityIndicator />
+        <ActivityIndicator color="#7C4DFF" />
         <Text style={{ color: '#fff', marginTop: 8 }}>
           Cargando tu biblioteca…
         </Text>
@@ -81,7 +47,7 @@ export default function LibraryScreen() {
     );
   }
 
-  if (err) {
+  if (errorMessage) {
     return (
       <View
         style={{
@@ -93,9 +59,11 @@ export default function LibraryScreen() {
           padding: 16,
         }}
       >
-        <Text style={{ color: '#fff', marginBottom: 12 }}>{err}</Text>
+        <Text style={{ color: '#fff', marginBottom: 12, textAlign: 'center' }}>
+          {errorMessage}
+        </Text>
         <Pressable
-          onPress={load}
+          onPress={retry}
           style={{ padding: 10, backgroundColor: '#4f46e5', borderRadius: 8 }}
         >
           <Text style={{ color: '#fff' }}>Reintentar</Text>
@@ -104,7 +72,7 @@ export default function LibraryScreen() {
     );
   }
 
-  if (!items.length) {
+  if (isLibraryEmpty()) {
     return (
       <View
         style={{
@@ -120,8 +88,9 @@ export default function LibraryScreen() {
     );
   }
 
-  function playSongByBlob(arg0: any): void {
-    throw new Error('Function not implemented.');
+  function playSongByBlob(arg0: { blobName: string; title: string }): void {
+    // TODO: Implement player functionality
+    console.log('[LibraryScreen] Play song:', arg0);
   }
 
   return (
@@ -133,10 +102,17 @@ export default function LibraryScreen() {
       }}
     >
       <FlatList
-        data={items}
+        data={songs}
         keyExtractor={(s) => String(s.id)}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
         contentContainerStyle={{ padding: 12, paddingBottom: 24 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={refreshLibrary}
+            tintColor="#7C4DFF"
+          />
+        }
         renderItem={({ item }) => (
           <Pressable
             onPress={() =>

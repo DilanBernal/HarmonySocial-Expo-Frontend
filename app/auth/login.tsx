@@ -27,8 +27,17 @@ const LoginScreen = () => {
   const [focus, setFocus] = useState<'user' | 'pass' | null>(null);
   const authService: AuthUserService = new AuthUserService();
 
-  const { control, handleSubmit, errors, getValues, onSubmit, isLoading } =
-    useLoginViewModel();
+  const {
+    control,
+    handleSubmit,
+    errors,
+    getValues,
+    onSubmit,
+    isLoading,
+    errorMessage,
+    clearError,
+    cleanup,
+  } = useLoginViewModel();
 
   const verifyExistingLogin = async () => {
     const token = await authService.getToken();
@@ -51,14 +60,27 @@ const LoginScreen = () => {
 
   useEffect(() => {
     verifyExistingLogin();
+
+    // Cleanup on unmount
+    return () => {
+      cleanup();
+    };
   }, []);
+
+  // Clear error when user starts typing
+  const handleFieldChange = (onChange: (value: string) => void) => (value: string) => {
+    if (errorMessage) {
+      clearError();
+    }
+    onChange(value);
+  };
 
   const finalSubmitHandler = handleSubmit(
     () => {
       onSubmit();
     },
     () => {
-      console.log('noje');
+      console.log('Validation error');
     }
   );
 
@@ -67,14 +89,15 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.safe}>
-      {isLoading ||
-        (!canLogin && (
-          <ActivityIndicator
-            size="large"
-            color={'blue'}
-            style={styles.chargeContainer}
-          />
-        ))}
+      {/* Loading overlay */}
+      {(isLoading || !canLogin) && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#7C4DFF" />
+          <Text style={styles.loadingText}>
+            {isLoading ? 'Iniciando sesión...' : 'Verificando sesión...'}
+          </Text>
+        </View>
+      )}
       {canLogin && (
         <LinearGradient
           colors={['#0c0f17', '#0c1222', '#0b0c16']}
@@ -120,6 +143,16 @@ const LoginScreen = () => {
                   Tu mundo musical, comparte y descubre.
                 </Text>
 
+                {/* Error message display */}
+                {errorMessage && (
+                  <View style={styles.errorContainer}>
+                    <Text style={styles.errorMessageText}>{errorMessage}</Text>
+                    <Pressable onPress={clearError} style={styles.errorDismiss}>
+                      <Text style={styles.errorDismissText}>×</Text>
+                    </Pressable>
+                  </View>
+                )}
+
                 <View>
                   <>
                     <Text style={styles.label}>Username o Email</Text>
@@ -136,7 +169,7 @@ const LoginScreen = () => {
                               styles.input,
                               focus === 'user' ? styles.inputFocus : null,
                             ]}
-                            onChangeText={field.onChange}
+                            onChangeText={handleFieldChange(field.onChange)}
                             onBlur={field.onBlur}
                             onFocus={() => setFocus('user')}
                             autoCapitalize="none"
@@ -176,7 +209,7 @@ const LoginScreen = () => {
                               ]}
                               value={field.value}
                               secureTextEntry={!showPassword}
-                              onChangeText={field.onChange}
+                              onChangeText={handleFieldChange(field.onChange)}
                               onBlur={() => {
                                 field.onBlur();
                                 setFocus(null);
@@ -404,15 +437,49 @@ export const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     fontWeight: '600',
   },
-  chargeContainer: {
+  /* Loading overlay */
+  loadingOverlay: {
     width: '100%',
     position: 'absolute',
     height: '100%',
     zIndex: 9,
     flex: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.40)',
-    backdropFilter: 'blur(20px)',
+    backgroundColor: 'rgba(0, 0, 0, 0.60)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingText: {
+    color: '#E6EAF2',
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  /* Error message */
+  errorContainer: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  errorMessageText: {
+    color: '#EF4444',
+    fontSize: 13,
+    flex: 1,
+    fontWeight: '500',
+  },
+  errorDismiss: {
+    marginLeft: 8,
+    padding: 4,
+  },
+  errorDismissText: {
+    color: '#EF4444',
+    fontSize: 20,
+    fontWeight: '700',
   },
 });
