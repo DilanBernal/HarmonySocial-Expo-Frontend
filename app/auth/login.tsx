@@ -5,7 +5,7 @@ import AuthUserService from '@/core/services/AuthUserService';
 import useLoginViewModel from '@/core/viewmodels/auth/login-view-model';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import {
   ActivityIndicator,
@@ -67,13 +67,16 @@ const LoginScreen = () => {
     };
   }, []);
 
-  // Clear error when user starts typing
-  const handleFieldChange = (onChange: (value: string) => void) => (value: string) => {
-    if (errorMessage) {
-      clearError();
-    }
-    onChange(value);
-  };
+  // Clear error when user starts typing - wrapped in useCallback
+  const handleFieldChange = useCallback(
+    (onChange: (value: string) => void) => (value: string) => {
+      if (errorMessage) {
+        clearError();
+      }
+      onChange(value);
+    },
+    [errorMessage, clearError]
+  );
 
   const finalSubmitHandler = handleSubmit(
     () => {

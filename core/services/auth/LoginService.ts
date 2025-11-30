@@ -123,6 +123,16 @@ export class LoginService {
   public getErrors(): Observable<string> {
     return this.errorSubject.asObservable();
   }
+
+  /**
+   * Cleans up all subjects to prevent memory leaks.
+   * Should be called when the service is no longer needed.
+   */
+  public destroy(): void {
+    this.loginSubject.complete();
+    this.loginResults$.complete();
+    this.errorSubject.complete();
+  }
 }
 
 // Export singleton instance

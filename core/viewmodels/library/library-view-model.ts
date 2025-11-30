@@ -1,7 +1,19 @@
-import { Song, songsService } from '@/core/services/songs/GetSongService';
+import {
+  ApiEnvelope,
+  Song,
+  songsService,
+} from '@/core/services/songs/GetSongService';
+import { Paginated } from '@/core/models/utils/Paginated';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
+
+/**
+ * Type for the songs list response from the API.
+ */
+interface SongsListResponse {
+  data?: ApiEnvelope<Paginated<Song>>;
+}
 
 /**
  * Library ViewModel - Manages the library screen state and logic following MVVM pattern.
@@ -49,12 +61,12 @@ const useLibraryViewModel = () => {
           })
         )
         .subscribe({
-          next: (response: any) => {
+          next: (response: SongsListResponse) => {
             console.log('[LibraryViewModel] Songs loaded:', response);
             const songsData = response?.data?.data?.rows ?? [];
             setSongs(songsData);
           },
-          error: (error: any) => {
+          error: (error: Error) => {
             console.error('[LibraryViewModel] Error loading songs:', error);
             setErrorMessage(
               error?.message ?? 'No se pudo cargar tu biblioteca'
@@ -96,12 +108,12 @@ const useLibraryViewModel = () => {
         })
       )
       .subscribe({
-        next: (response: any) => {
+        next: (response: SongsListResponse) => {
           console.log('[LibraryViewModel] Library refreshed:', response);
           const songsData = response?.data?.data?.rows ?? [];
           setSongs(songsData);
         },
-        error: (error: any) => {
+        error: (error: Error) => {
           console.error('[LibraryViewModel] Error refreshing:', error);
           setErrorMessage(
             error?.message ?? 'No se pudo actualizar tu biblioteca'

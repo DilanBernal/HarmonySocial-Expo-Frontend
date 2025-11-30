@@ -1,5 +1,5 @@
 import useLibraryViewModel from '@/core/viewmodels/library/library-view-model';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -27,6 +27,15 @@ export default function LibraryScreen() {
     refreshLibrary,
     retry,
   } = useLibraryViewModel();
+
+  // Play song handler - wrapped in useCallback to prevent recreation on every render
+  const playSongByBlob = useCallback(
+    (arg0: { blobName: string; title: string }): void => {
+      // TODO: Implement player functionality
+      console.log('[LibraryScreen] Play song:', arg0);
+    },
+    []
+  );
 
   if (isLoading && !isRefreshing) {
     return (
@@ -86,11 +95,6 @@ export default function LibraryScreen() {
         <Text style={{ color: '#fff' }}>Aún no tienes canciones subidas</Text>
       </View>
     );
-  }
-
-  function playSongByBlob(arg0: { blobName: string; title: string }): void {
-    // TODO: Implement player functionality
-    console.log('[LibraryScreen] Play song:', arg0);
   }
 
   return (
