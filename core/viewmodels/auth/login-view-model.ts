@@ -3,13 +3,13 @@ import { LoginResponseData } from '@/core/dtos/responses/LoginResponse';
 import AuthUserService from '@/core/services/seg/AuthUserService';
 import { loginValidationSchema } from '@/core/types/schemas/loginValidationSchema';
 import { yupResolver } from '@hookform/resolvers/yup';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Subject, Subscription } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { isAxiosError } from 'axios';
 
 const useLoginViewModel = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,10 +55,23 @@ const useLoginViewModel = () => {
       .pipe(
         takeUntil(destroy$),
         catchError((error) => {
-          debugger;
-          const errorMsg = error.message;
+          if (isAxiosError(error)) {
+            if (!error.response) {
+              return throwError(() => new Error("No se obtuvo respuesta de el servidor"));
+            }
+            switch (error.response.status) {
+              case 401:
+                return throwError(() => new Error("Credenciales invalidas"));
+              case 404:
+                return throwError(() => new Error("No se obtuvo respuesta de el servidor"));
+              case 500:
+                return throwError(() => new Error(error.response?.data.message));
+              default:
+                return throwError(() => error);
+            }
+          }
           console.error('[LoginViewModel] Login failed:', error);
-          return throwError(() => new Error(errorMsg));
+          return throwError(() => error);
         }),
         finalize(() => {
           setIsLoading(false);
@@ -68,7 +81,6 @@ const useLoginViewModel = () => {
         next: (response) => {
           if (!response) {
             setErrorMessage('No se recibió respuesta del servidor.');
-            debugger;
             return;
           }
 
@@ -84,8 +96,6 @@ const useLoginViewModel = () => {
         },
       });
   }, [getValues, authService, router, destroy$]);
-
-
 
   const verifyExistingLogin = useCallback(() => {
     const token = authService.userTokenCache;
@@ -106,13 +116,11 @@ const useLoginViewModel = () => {
   }, [setCanLogin, router, authService]);
 
   const onSubmit = useCallback(() => {
-    // Prevent multiple submissions while loading
     if (isLoading) {
       console.log('[LoginViewModel] Already loading, ignoring submit');
       return;
     }
 
-    // Clear previous error and start loading
     setErrorMessage(null);
     setIsLoading(true);
     performLogin();

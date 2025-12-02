@@ -24,7 +24,7 @@ export class AuthUserService {
     this.axiosConfig = {
       baseURL: process.env.EXPO_PUBLIC_API_URL,
       headers: {
-        Accept: 'app'
+        "Content-Type": 'application/json'
       }
     };
     this.httpClient = Axios.create(this.axiosConfig);
@@ -85,10 +85,11 @@ export class AuthUserService {
     const config = { ...this.axiosConfig };
 
     const interceptedConfig = AuthInterceptor(config, this.userTokenCache!)
-    return this.httpClient.get<UserBasicData>(`/users/basic-info?id=${this.id}`, interceptedConfig).pipe(map(x => {
-      debugger;
-      return x.data;
-    }));
+    return this.httpClient.get<UserBasicData>(`/users/basic-info?id=${this.id}`, interceptedConfig)
+      .pipe(map(x => {
+        debugger;
+        return x.data;
+      }));
   }
 
   setAsyncUserData(
@@ -131,12 +132,17 @@ export class AuthUserService {
 
     debugger;
     this.getDataInfoFromApi()
+      .pipe(catchError(err => {
+        debugger;
+        throw err;
+      }))
       .subscribe(async (value: UserBasicData) => {
         console.log(value);
         userData = { ...value };
         console.log(userData);
         debugger;
         await AsyncStorage.setItem(this.ASYNC_STORAGE_USER_DATA_KEY, JSON.stringify(userData));
+        debugger;
       },
       );
     return;

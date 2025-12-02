@@ -11,29 +11,29 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
+import AuthUserService from '../seg/AuthUserService';
+import AuthInterceptorRx from '@/core/http/interceptors/AuthInterceptorRx';
 
-export type ApiEnvelope<T> = { success: boolean; data: T };
-
-/**
- * SongQueryService - Service for querying and searching songs.
- * Follows Single Responsibility Principle - only handles read operations.
- */
 export class SongQueryService {
   private httpClient;
   private searchSubject = new Subject<string>();
   private searchResults$ = new Subject<Song[]>();
 
   // Cache for user's song list
-  private myListCache$: Observable<Paginated<Song>
-  > | null = null;
+  private myListCache$: Observable<Paginated<Song>> | null = null;
   private lastPage: number = 0;
   private lastLimit: number = 0;
-
+  private readonly authService = AuthUserService;
+  private axiosConfig;
   constructor() {
-    this.httpClient = Axios.create({
+    this.axiosConfig = {
       baseURL: process.env.EXPO_PUBLIC_API_URL,
-
-    });
+      headers: {
+        "Content-Type": 'application/json'
+      }
+    };
+    this.httpClient = Axios.create(this.axiosConfig);
+    this.httpClient.interceptors.request.use(AuthInterceptorRx);
     this.setupDebouncedSearch();
   }
 
