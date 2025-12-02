@@ -1,6 +1,5 @@
-import { HttpResponse } from '@/core/http';
-import HttpClient from '@/core/http/HttpClient';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
+import { AxiosInstance } from 'axios';
 import {
   catchError,
   debounceTime,
@@ -8,6 +7,8 @@ import {
   map,
   switchMap,
 } from 'rxjs/operators';
+import { Axios } from 'rxjs-axios';
+import { HttpResponse } from '@/core/types/HttpResponse';
 export type SearchUser = {
   id: string;
   name: string;
@@ -93,7 +94,7 @@ const mapSong = (s: any): SearchSong => ({
 });
 
 export class SearchService {
-  private httpClient: HttpClient;
+  private httpClient: Axios;
   private searchSubject = new Subject<string>();
   private lastSearchResults: SearchResponse = {
     users: [],
@@ -102,7 +103,9 @@ export class SearchService {
   };
 
   constructor() {
-    this.httpClient = new HttpClient(process.env.EXPO_PUBLIC_API_URL);
+    this.httpClient = Axios.create({
+      baseURL: process.env.EXPO_PUBLIC_API_URL
+    });
 
     // Setup debounced search
     this.setupDebouncedSearch();
@@ -259,52 +262,45 @@ export class SearchService {
   }
 
   // Búsquedas específicas por tipo
-  searchUsers(query: string): Observable<HttpResponse<SearchUser[]>> {
+  searchUsers(query: string): Observable<SearchUser[]> {
     return this.httpClient
       .get<any>(`/users/paginated?q=${encodeURIComponent(query)}&limit=20`)
       .pipe(
+        map(x => x.data),
         map((response) => ({
           ...response,
           data: pickRowsDeep(response.data).map(mapUser),
         })),
         catchError((error) => {
           console.error('SearchService.searchUsers - Error:', error);
-          return of({
-            data: [],
-            status: 500,
-            statusText: 'Error',
-            headers: new Headers(), // Use a valid Headers instance
-          });
+          return of([]);
         })
       );
   }
 
-  searchArtists(query: string): Observable<HttpResponse<SearchArtist[]>> {
+  searchArtists(query: string): Observable<SearchArtist[]> {
     return this.httpClient
       .get<any>(`/artists/pagination?q=${encodeURIComponent(query)}&limit=20`)
       .pipe(
+        map(x => x.data),
         map((response) => ({
           ...response,
           data: pickRowsDeep(response.data).map(mapArtist),
         })),
         catchError((error) => {
           console.error('SearchService.searchArtists - Error:', error);
-          return of({
-            data: [],
-            status: 500,
-            statusText: 'Error',
-            headers: new Headers(),
-          });
+          return of([]);
         })
       );
   }
 
-  searchSongs(query: string): Observable<HttpResponse<any>> {
+  searchSongs(query: string): Observable<any> {
     return this.httpClient
       .get<
         HttpResponse<SearchResponse[]>
       >(`/songs/search?q=${encodeURIComponent(query)}&limit=20`)
       .pipe(
+        map(x => x.data),
         map((response) => ({
           ...response,
           data: pickRowsDeep(response.data).map(mapSong),

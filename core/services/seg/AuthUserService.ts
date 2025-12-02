@@ -1,66 +1,94 @@
 import User from '@/core/models/data/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { from, map, Observable } from 'rxjs';
+import { catchError, from, map, Observable, of, tap } from 'rxjs';
 import LoginDTO from '../../dtos/LoginDTO';
 import { RegisterDTO } from '../../dtos/RegisterDTO';
 import LoginResponse from '../../dtos/responses/LoginResponse';
 import UserBasicData from '../../dtos/user/UserBasicData';
-import { httpClient } from '../../http';
 import { HttpResponse } from '../../types/HttpResponse';
+import { Axios, formToJSON } from 'rxjs-axios';
+import AuthInterceptor from '@/core/http/interceptors/AuthInterceptor';
 
-const SECURE_STORE_TOKEN_KEY = 'user_token';
-const ASYNC_STORAGE_USER_DATA_KEY = 'user_data';
-3
-export default class AuthUserService {
+
+export class AuthUserService {
+  private static instance: AuthUserService
+  readonly SECURE_STORE_TOKEN_KEY = 'user_token';
+  readonly ASYNC_STORAGE_USER_DATA_KEY = 'user_data';
   private id: number = -1;
+  public userTokenCache!: string | null;
+  private httpClient;
+  private axiosConfig;
+
+  constructor() {
+    this.axiosConfig = {
+      baseURL: process.env.EXPO_PUBLIC_API_URL,
+      headers: {
+        Accept: 'app'
+      }
+    };
+    this.httpClient = Axios.create(this.axiosConfig);
+  }
+
+  public static getInstance(): AuthUserService {
+    if (!AuthUserService.instance) {
+      AuthUserService.instance = new AuthUserService();
+    }
+    return AuthUserService.instance;
+  }
 
   public get userId(): number {
     return this.id;
   }
 
-  getToken(): Observable<string | null> {
-    return from(SecureStore.getItemAsync(SECURE_STORE_TOKEN_KEY)).pipe(map(value => {
-      if (!value) return null;
-      return JSON.parse(value);
-    }));
+  getTokenFromAsyncStorage(): Observable<string | null> {
+    return from(SecureStore.getItemAsync(this.SECURE_STORE_TOKEN_KEY))
+      .pipe(catchError((err) => {
+        console.error(err);
+        return of(null);
+      }), tap((x) => this.userTokenCache = x)
+      );
   }
 
   logout(): void {
-    SecureStore.deleteItemAsync(SECURE_STORE_TOKEN_KEY)
+    SecureStore.deleteItemAsync(this.SECURE_STORE_TOKEN_KEY)
       .then(console.log)
       .catch(err => { console.error(err) });
-    AsyncStorage.removeItem(ASYNC_STORAGE_USER_DATA_KEY)
+    AsyncStorage.removeItem(this.ASYNC_STORAGE_USER_DATA_KEY)
       .then(console.log)
       .catch((er) => { console.error(er) });
   }
 
   login(data: LoginDTO): Observable<LoginResponse> {
-    return httpClient.post('/users/login', data);
+    return this.httpClient.post<LoginResponse>('/users/login', data).pipe(map((x) => {
+      return x.data;
+    }));
   }
 
   register(data: RegisterDTO): Observable<any> {
-    return httpClient.post('/users/register', data);
+    return this.httpClient.post('/users/register', data);
   }
 
-  async getDataInfoFromAsyncStorage() {
-    const userStorage = await AsyncStorage.getItem(ASYNC_STORAGE_USER_DATA_KEY);
-    const userToken = this.getToken();
-    console.log(userStorage, userToken)
-    if (userStorage && userToken) {
-      const dataParsed = JSON.parse(userStorage);
-      console.log(dataParsed);
-      this.id = dataParsed.id;
-      return dataParsed;
-    } else {
-      this.logout();
-      return;
-    }
+  getDataInfoFromAsyncStorage(): Observable<UserBasicData> {
+    debugger;
+    return from(AsyncStorage.getItem(this.ASYNC_STORAGE_USER_DATA_KEY)).pipe(map((value) => {
+      if (!value || value.trim() == "") {
+        throw new Error("No se pudo traer los datos del usuario");
+      }
+      const userDataFromJson: UserBasicData = JSON.parse(value);
+      return userDataFromJson;
+    }));
   }
 
-  getDataInfoFromApi(): Observable<HttpResponse<UserBasicData>> {
-    // this.getIdSyncFromAsyncStorage()
-    return httpClient.get(`/users/basic-info?id=${this.id}`);
+  getDataInfoFromApi(): Observable<UserBasicData> {
+
+    const config = { ...this.axiosConfig };
+
+    const interceptedConfig = AuthInterceptor(config, this.userTokenCache!)
+    return this.httpClient.get<UserBasicData>(`/users/basic-info?id=${this.id}`, interceptedConfig).pipe(map(x => {
+      debugger;
+      return x.data;
+    }));
   }
 
   setAsyncUserData(
@@ -68,8 +96,16 @@ export default class AuthUserService {
     partialUserData?: Partial<User>,
     loginResponse?: LoginResponse
   ) {
+
+    const setIdToSearch = (): number => {
+      if (id) return id;
+      if (loginResponse && loginResponse.data.id) return loginResponse.data.id;
+      if (partialUserData?.id) return partialUserData.id;
+      return NaN;
+    }
+
     let userData: UserBasicData = {
-      id: id ?? -1,
+      id: setIdToSearch(),
       fullName: partialUserData?.full_name ?? '',
       email: partialUserData?.email ?? '',
       activeFrom: 0,
@@ -79,38 +115,46 @@ export default class AuthUserService {
       favoriteInstrument: partialUserData?.favorite_instrument ?? -1,
     };
 
-    const setIdToSearch = (): number => {
-      if (idToSearch) return idToSearch;
-      if (loginResponse && loginResponse.data.id) return loginResponse.data.id;
-      if (partialUserData?.id) return partialUserData.id;
-      return NaN;
-    }
 
     const idToSearch: number = setIdToSearch();
     if (isNaN(idToSearch)) {
-      this.id = idToSearch;
-    }
-
-    if (loginResponse) {
-      httpClient
-        .get<UserBasicData>(`/users/basic-info?id=${loginResponse.data.id}`)
-        .subscribe((value: UserBasicData) => {
-          console.log(value);
-          userData = { ...value };
-          console.log(userData);
-          AsyncStorage.setItem(ASYNC_STORAGE_USER_DATA_KEY, JSON.stringify(userData));
-        },
-        );
+      this.logout();
       return;
     }
+    this.id = idToSearch;
 
-    if (partialUserData?.id) {
+    if (loginResponse) {
+      this.setTokenInAsyncStorage(loginResponse.data.token);
+      debugger;
     }
 
-    if (id && id > 0) {
-      httpClient.get(`/users/basic-info?id=${id}`).subscribe((x) => {
-        console.log(x);
+
+    debugger;
+    this.getDataInfoFromApi()
+      .subscribe(async (value: UserBasicData) => {
+        console.log(value);
+        userData = { ...value };
+        console.log(userData);
+        debugger;
+        await AsyncStorage.setItem(this.ASYNC_STORAGE_USER_DATA_KEY, JSON.stringify(userData));
+      },
+      );
+    return;
+  }
+
+  setTokenInAsyncStorage(token: string): void {
+    this.userTokenCache = token;
+    debugger;
+    SecureStore.setItemAsync(this.SECURE_STORE_TOKEN_KEY, token)
+      .then(async () => {
+        console.log(await SecureStore.getItemAsync(this.SECURE_STORE_TOKEN_KEY))
+      })
+      .then(() => { console.log("El token se guardo correctamente") })
+      .catch((err) => {
+        this.logout();
+        throw err;
       });
-    }
   }
 }
+
+export default AuthUserService.getInstance();

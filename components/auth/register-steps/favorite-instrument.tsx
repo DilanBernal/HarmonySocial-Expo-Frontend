@@ -4,13 +4,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { RegisterFormData } from '../../../core/dtos/RegisterFormData';
 import { UserInstrument } from '@/core/models/data/User';
 import InstrumentOption from './instrument-option';
-
-export type instrumentOptionType = {
-  key: UserInstrument;
-  label: string;
-  image: string;
-  description: string;
-};
+import { instrumentOptionType } from '@/core/types/instrumentOption';
 
 const instrumentOptions: instrumentOptionType[] = [
   {

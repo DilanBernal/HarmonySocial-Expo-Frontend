@@ -20,7 +20,7 @@ const useProfileViewModel = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Services
-  const authUserService = useRef(new AuthUserService()).current;
+  const authUserService = useRef(AuthUserService).current;
 
   // RxJS subjects for cleanup
   const destroy$ = useRef(new Subject<void>()).current;
@@ -43,27 +43,29 @@ const useProfileViewModel = () => {
     setIsLoading(true);
     setErrorMessage(null);
 
-    try {
-      const userStorage = await authUserService.getDataInfoFromAsyncStorage();
+    authUserService.getDataInfoFromAsyncStorage().subscribe((userStorage) => {
+      if (!userStorage) {
+        console.error('[ProfileViewModel] Error loading profile:');
+        setErrorMessage('Error al cargar el perfil.');
+        setIsLoading(false);
+      }
+      debugger;
       console.log('[ProfileViewModel] User data from storage:', userStorage);
 
       if (!userStorage) {
         console.log('[ProfileViewModel] No user data in storage, logging out...');
-        await logout();
+        logout();
         return;
       }
 
       // Update state with stored data
       setProfileImage(userStorage.profileImage);
-      setUsername(userStorage.username || '');
-      setMemberSince(userStorage.activeFrom || '');
+      setUsername(userStorage.username ?? '');
+      setMemberSince(String(userStorage.activeFrom) ?? '');
       setLearningPoints(userStorage.learningPoints);
       setIsLoading(false);
-    } catch (error) {
-      console.error('[ProfileViewModel] Error loading profile:', error);
-      setErrorMessage('Error al cargar el perfil.');
-      setIsLoading(false);
-    }
+    });
+
   }, [authUserService]);
 
   /**
@@ -94,7 +96,7 @@ const useProfileViewModel = () => {
         .subscribe({
           next: (value) => {
             console.log('[ProfileViewModel] Profile refreshed:', value);
-            updateProfileState(value.data);
+            updateProfileState(value);
           },
           error: (error) => {
             console.error('[ProfileViewModel] Error refreshing profile:', error);
@@ -110,7 +112,7 @@ const useProfileViewModel = () => {
   const logout = useCallback(async () => {
     try {
       console.log('[ProfileViewModel] Logging out...');
-      await authUserService.logout();
+      authUserService.logout();
       router.replace('/auth/login');
     } catch (error) {
       console.error('[ProfileViewModel] Error during logout:', error);

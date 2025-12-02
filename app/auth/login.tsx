@@ -1,4 +1,5 @@
 import { EqBars } from '@/components/general/eq-bars';
+import AuthUserService from '@/core/services/seg/AuthUserService';
 import useLoginViewModel from '@/core/viewmodels/auth/login-view-model';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -19,7 +20,6 @@ import {
 
 const LoginScreen = () => {
   const router = useRouter();
-  const [canLogin, setCanLogin] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focus, setFocus] = useState<'user' | 'pass' | null>(null);
 
@@ -32,29 +32,10 @@ const LoginScreen = () => {
     errorMessage,
     clearError,
     cleanup,
+    canLogin,
   } = useLoginViewModel();
 
-  const verifyExistingLogin = () => {
-    const token = "";
-
-    if (token) {
-      setCanLogin(false);
-      // authService.getIdSyncFromAsyncStorage();
-      // const id = authService.userId;
-      // authService.getDataInfoFromApi().subscribe({
-      //   next: (x: HttpResponse<UserBasicData>) => {
-      //     console.log(x);
-      //   },
-      // });
-      router.replace('/main/feed');
-    }
-    setCanLogin(true);
-  };
-
   useEffect(() => {
-    verifyExistingLogin();
-
-    // Cleanup on unmount
     return () => {
       cleanup();
     };

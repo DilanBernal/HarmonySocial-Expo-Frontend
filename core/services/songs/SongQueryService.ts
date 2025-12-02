@@ -1,11 +1,12 @@
-import { HttpClient, HttpResponse } from '@/core/http';
 import { Song } from '@/core/models/data/Song';
 import { Paginated } from '@/core/models/utils/Paginated';
 import { Observable, of, Subject } from 'rxjs';
+import { Axios } from 'rxjs-axios';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
+  map,
   shareReplay,
   switchMap,
   tap,
@@ -18,19 +19,21 @@ export type ApiEnvelope<T> = { success: boolean; data: T };
  * Follows Single Responsibility Principle - only handles read operations.
  */
 export class SongQueryService {
-  private httpClient: HttpClient;
+  private httpClient;
   private searchSubject = new Subject<string>();
-  private searchResults$ = new Subject<HttpResponse<Song[]>>();
+  private searchResults$ = new Subject<Song[]>();
 
   // Cache for user's song list
-  private myListCache$: Observable<
-    HttpResponse<ApiEnvelope<Paginated<Song>>>
+  private myListCache$: Observable<Paginated<Song>
   > | null = null;
   private lastPage: number = 0;
   private lastLimit: number = 0;
 
   constructor() {
-    this.httpClient = new HttpClient(process.env.EXPO_PUBLIC_API_URL);
+    this.httpClient = Axios.create({
+      baseURL: process.env.EXPO_PUBLIC_API_URL,
+
+    });
     this.setupDebouncedSearch();
   }
 
@@ -52,27 +55,23 @@ export class SongQueryService {
   /**
    * Executes the actual search API call.
    */
-  private executeSearch(query: string): Observable<HttpResponse<Song[]>> {
+  private executeSearch(query: string): Observable<Song[]> {
     if (!query.trim()) {
       return of({
         data: [],
         status: 200,
         statusText: 'OK',
         headers: new Headers(),
-      });
+      } as any);
     }
 
     return this.httpClient
       .get<Song[]>(`/songs/search?q=${encodeURIComponent(query)}`)
       .pipe(
+        map(x => x.data),
         catchError((error) => {
           console.error('[SongQueryService] Search error:', error);
-          return of({
-            data: [],
-            status: 500,
-            statusText: 'Error',
-            headers: new Headers(),
-          });
+          return of([]);
         })
       );
   }
@@ -83,7 +82,7 @@ export class SongQueryService {
    * @param query - Search query string
    * @returns Observable of search results
    */
-  searchDebounced(query: string): Observable<HttpResponse<Song[]>> {
+  searchDebounced(query: string): Observable<Song[]> {
     this.searchSubject.next(query);
     return this.searchResults$.asObservable();
   }
@@ -94,7 +93,7 @@ export class SongQueryService {
    * @param query - Search query string
    * @returns Observable of search results
    */
-  search(query: string): Observable<HttpResponse<Song[]>> {
+  search(query: string): Observable<Song[]> {
     return this.executeSearch(query);
   }
 
@@ -103,12 +102,13 @@ export class SongQueryService {
    * @param id - Song ID
    * @returns Observable of song data
    */
-  getById(id: string): Observable<HttpResponse<Song>> {
+  getById(id: string): Observable<Song> {
     return this.httpClient.get<Song>(`songs/${id}`).pipe(
       catchError((error) => {
         console.error('[SongQueryService] getById error:', error);
         throw error;
-      })
+      }),
+      map(x => x.data)
     );
   }
 
@@ -121,7 +121,7 @@ export class SongQueryService {
   listUserSongs(
     page = 1,
     limit = 20
-  ): Observable<HttpResponse<ApiEnvelope<Paginated<Song>>>> {
+  ): Observable<Paginated<Song>> {
     console.log(`[SongQueryService] Fetching user songs - page: ${page}, limit: ${limit}`);
 
     // Return cached result if same request
@@ -136,11 +136,12 @@ export class SongQueryService {
 
     // Create new request with caching
     this.myListCache$ = this.httpClient
-      .get<ApiEnvelope<Paginated<Song>>>(`/songs/mine/list?page=${page}&limit=${limit}`)
+      .get<Paginated<Song>>(`/songs/mine/list?page=${page}&limit=${limit}`)
       .pipe(
         tap((response) => {
           console.log('[SongQueryService] listUserSongs response:', response);
         }),
+        map((x => x.data)),
         shareReplay(1),
         catchError((error) => {
           console.error('[SongQueryService] listUserSongs error:', error);
@@ -149,7 +150,7 @@ export class SongQueryService {
         })
       );
 
-    return this.myListCache$;
+    return this.myListCache$ as any;
   }
 
   /**
@@ -161,12 +162,13 @@ export class SongQueryService {
   listAll(
     page = 1,
     limit = 20
-  ): Observable<HttpResponse<ApiEnvelope<Paginated<Song>>>> {
+  ): Observable<Paginated<Song>> {
     console.log(`[SongQueryService] Fetching all songs - page: ${page}, limit: ${limit}`);
 
     return this.httpClient
-      .get<ApiEnvelope<Paginated<Song>>>(`songs?page=${page}&limit=${limit}`)
+      .get<Paginated<Song>>(`songs?page=${page}&limit=${limit}`)
       .pipe(
+        map(x => x.data),
         tap((response) => {
           console.log('[SongQueryService] listAll response:', response);
         }),

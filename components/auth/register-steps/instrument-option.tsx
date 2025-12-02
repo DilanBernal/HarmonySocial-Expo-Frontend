@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, ImageBackground, View, Text } from 'react-native';
-import { instrumentOptionType, styles } from './favorite-instrument';
+import { styles } from './favorite-instrument';
+import { instrumentOptionType } from '@/core/types/instrumentOption';
 import { UserInstrument } from '@/core/models/data/User';
 
 const InstrumentOption = ({
