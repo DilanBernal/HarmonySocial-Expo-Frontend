@@ -11,8 +11,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { MultiStep, Step } from 'react-native-multistep';
 import { PostFormValues, PostPayload } from '@/core/types/post';
 import {
-  step1ValidationSchema,
-  step2ValidationSchema,
+  completePostValidationSchema,
 } from '@/core/types/schemas/postValidationSchema';
 import { Step1BasicInfo } from './create-steps/step1-basic-info';
 import { Step2Content } from './create-steps/step2-content';
@@ -37,9 +36,8 @@ export const MultiStepPostForm: React.FC<MultiStepPostFormProps> = ({
     handleSubmit,
     formState: { errors },
     getValues,
-    trigger,
   } = useForm<PostFormValues>({
-    resolver: yupResolver(step1ValidationSchema),
+    resolver: yupResolver(completePostValidationSchema),
     defaultValues: {
       category: initialValues?.category || 'music',
       title: initialValues?.title || '',
@@ -48,31 +46,8 @@ export const MultiStepPostForm: React.FC<MultiStepPostFormProps> = ({
       song_id: initialValues?.song_id,
       ...initialValues,
     },
-    mode: 'onBlur',
+    mode: 'onChange',
   });
-
-  /**
-   * Validates step 1 fields
-   */
-  const validateStep1 = async (): Promise<boolean> => {
-    const result = await trigger(['category', 'title', 'short_description']);
-    return result;
-  };
-
-  /**
-   * Validates step 2 fields
-   */
-  const validateStep2 = async (): Promise<boolean> => {
-    const category = getValues('category');
-    const fieldsToValidate: (keyof PostFormValues)[] = ['description'];
-    
-    if (category === 'music') {
-      fieldsToValidate.push('song_id');
-    }
-    
-    const result = await trigger(fieldsToValidate);
-    return result;
-  };
 
   /**
    * Handles form submission
@@ -203,16 +178,6 @@ export const MultiStepPostForm: React.FC<MultiStepPostFormProps> = ({
         progressCircleLabelStyle={styles.progressLabel}
         globalNextStepTitleStyle={{ display: 'none' }}
         onFinalStepSubmit={handleSubmit(onSubmit)}
-        onNextStep={(stepNumber) => {
-          console.log('[MultiStepPostForm] Moving to step:', stepNumber);
-          // Validate current step before moving
-          if (stepNumber === 2) {
-            return validateStep1();
-          } else if (stepNumber === 3) {
-            return validateStep2();
-          }
-          return Promise.resolve(true);
-        }}
       >
         {/* Step 1: Basic Info */}
         <Step
