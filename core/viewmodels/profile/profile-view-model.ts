@@ -26,7 +26,7 @@ const useProfileViewModel = () => {
 
   const updateProfileState = useCallback((userData: UserBasicData) => {
     setUsername(userData.username || '');
-    setProfileImage(userData.profileImageUrl);
+    setProfileImage((userData as any).profileImage);
     setMemberSince(String(userData.activeFrom || ''));
     setLearningPoints(userData.learningPoints);
   }, []);
@@ -103,7 +103,9 @@ const useProfileViewModel = () => {
     try {
       console.log('[ProfileViewModel] Logging out...');
       authUserService.logout();
-      router.replace('/auth/login');
+      setTimeout(() => {
+        router.replace('/auth/login');
+      }, 1000)
     } catch (error) {
       console.error('[ProfileViewModel] Error during logout:', error);
       setErrorMessage('Error al cerrar sesión.');

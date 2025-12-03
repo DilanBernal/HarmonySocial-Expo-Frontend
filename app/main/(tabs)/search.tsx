@@ -17,7 +17,7 @@ import ProfileImage from '@/components/general/profile-image';
 import UserBasicData from '@/core/dtos/user/UserBasicData';
 
 type Section =
-  | { title: 'Usuarios'; type: 'users'; data: User[] }
+  | { title: 'Usuarios'; type: 'users'; data: UserBasicData[] }
   | { title: 'Artistas'; type: 'artists'; data: Artist[] }
   | { title: 'Canciones'; type: 'songs'; data: Song[] };
 
@@ -165,7 +165,7 @@ export default function SearchScreen() {
         <View
           style={{ flexDirection: 'row', padding: 12, alignItems: 'center' }}
         >
-          <ProfileImage image={u.profileImageUrl} imageStyle={{ width: 44, height: 44, borderRadius: 22 }} />
+          <ProfileImage image={u.profileImageUrl ?? 'avatar1'} imageStyle={{ width: 44, height: 44, borderRadius: 22 }} />
           <Text style={{ color: '#fff', marginLeft: 10, fontWeight: '600' }}>
             {u.username}
           </Text>
