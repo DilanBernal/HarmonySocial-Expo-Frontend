@@ -1,14 +1,12 @@
 import LoginDTO from '@/core/dtos/LoginDTO';
-import { LoginResponseData } from '@/core/dtos/responses/LoginResponse';
 import AuthUserService from '@/core/services/seg/AuthUserService';
 import { loginValidationSchema } from '@/core/types/schemas/loginValidationSchema';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, throwError } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
-import { throwError } from 'rxjs';
 import { isAxiosError } from 'axios';
 
 const useLoginViewModel = () => {
@@ -84,7 +82,6 @@ const useLoginViewModel = () => {
             return;
           }
 
-          const data: LoginResponseData = response.data;
 
           authService.setAsyncUserData(undefined, undefined, response);
           setErrorMessage(null);
@@ -129,7 +126,7 @@ const useLoginViewModel = () => {
 
   useEffect(() => {
     verifyExistingLogin();
-  }, []);
+  }, [verifyExistingLogin]);
 
   const cleanup = useCallback(() => {
     destroy$.next();

@@ -7,7 +7,7 @@ export const loginValidationSchema = Yup.object({
     .min(3, 'Mínimo 3 caracteres')
     .max(50, 'Máximo 50 caracteres')
     .matches(
-      /^[a-zA-Z0-9_*\-#$!|°.+]{3,20}$/,
+      /^[a-zA-Z0-9_*\-#$!|°.+]{3,50}$/,
       'El usuario o correo está en formato incorrecto'
     ),
   password: Yup.string()

@@ -3,15 +3,28 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack, useNavigationContainerRef } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useColorScheme, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const theme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
+  const navigationRef = useNavigationContainerRef();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    if (navigationRef?.current) {
+      setIsReady(true);
+    }
+  }, [navigationRef]);
+
+  if (!isReady) {
+    return <ActivityIndicator />
+  }
 
   return (
     <ThemeProvider value={theme}>
@@ -36,9 +49,6 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
-          <Stack.Screen
-            name="main"
-            options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="light" backgroundColor="#8400ffff" />
       </View>
