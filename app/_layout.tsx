@@ -19,6 +19,7 @@ export default function RootLayout() {
         <Stack
           initialRouteName="auth"
           screenOptions={{
+            headerShown: false,
             contentStyle: {
               marginTop: insets.top * 1.2,
               backgroundColor: 'transparent',
@@ -35,7 +36,9 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
-          <Stack.Screen name="main" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="main"
+            options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="light" backgroundColor="#8400ffff" />
       </View>

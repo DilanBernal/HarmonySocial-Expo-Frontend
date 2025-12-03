@@ -1,5 +1,4 @@
 import {
-  SearchResponse,
   searchService,
 } from '@/core/services/search/search-service';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -22,7 +21,7 @@ const useSearchViewModel = () => {
   const [query, setQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [results, setResults] = useState<SearchResponse>({
+  const [results, setResults] = useState<any>({
     users: [],
     artists: [],
     songs: [],

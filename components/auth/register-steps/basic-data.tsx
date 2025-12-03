@@ -8,6 +8,7 @@ import {
   FieldValues,
   UseFormGetFieldState,
 } from 'react-hook-form';
+import { Ionicons } from '@expo/vector-icons';
 
 type BasicDataStepProps = {
   control: Control<any>;
@@ -141,9 +142,8 @@ export const BasicDataStep: React.FC<BasicDataStepProps> = ({
                   showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
                 }
               >
-                <Text style={s.affixText}>
-                  {showPassword ? 'Ocultar' : 'Mostrar'}
-                </Text>
+                <Ionicons size={30} name={showPassword ? 'eye-off' : 'eye'} style={s.affixIcon} />
+
               </Pressable>
             </View>
             {fieldState.error && (
@@ -187,9 +187,7 @@ export const BasicDataStep: React.FC<BasicDataStepProps> = ({
                     : 'Mostrar confirmación'
                 }
               >
-                <Text style={s.affixText}>
-                  {showConfirmPassword ? 'Ocultar' : 'Mostrar'}
-                </Text>
+                <Ionicons size={30} name={showConfirmPassword ? 'eye-off' : 'eye'} style={s.affixIcon} />
               </Pressable>
             </View>
             {fieldState.error && (
@@ -242,16 +240,13 @@ export const s = StyleSheet.create({
   affix: {
     position: 'absolute',
     right: 0,
-    top: 0,
-    paddingHorizontal: 15,
-    paddingVertical: 15.5,
+    top: "50%",
+    paddingHorizontal: 10,
+    transform: [{ "translateY": "-50%" }, { "translateY": "5%" }],
     borderRadius: 100,
-    backgroundColor: '#39277d3c',
   },
-  affixText: {
+  affixIcon: {
     color: '#9AA3B2',
-    fontWeight: '600',
-    fontSize: 12,
   },
 });
 

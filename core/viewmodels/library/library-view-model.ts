@@ -1,6 +1,5 @@
 import { Song } from '@/core/models/data/Song';
 import {
-  ApiEnvelope,
   songQueryService,
 } from '@/core/services/songs/SongQueryService';
 import { Paginated } from '@/core/models/utils/Paginated';
@@ -8,32 +7,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 
-/**
- * Type for the songs list response from the API.
- */
-interface SongsListResponse {
-  data?: ApiEnvelope<Paginated<Song>>;
-}
 
-/**
- * Library ViewModel - Manages the library screen state and logic following MVVM pattern.
- * Uses RxJS for reactive data handling with proper cleanup.
- */
 const useLibraryViewModel = () => {
-  // State
   const [songs, setSongs] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // RxJS subjects for cleanup
   const destroy$ = useRef(new Subject<void>()).current;
   const subscriptionRef = useRef<Subscription | null>(null);
   const isLoadingRef = useRef(false);
 
-  /**
-   * Loads the user's songs from the API.
-   */
   const loadSongs = useCallback(
     (page = 1, limit = 50) => {
       if (isLoadingRef.current) {
@@ -41,7 +25,6 @@ const useLibraryViewModel = () => {
         return;
       }
 
-      console.log('[LibraryViewModel] Loading songs...');
       isLoadingRef.current = true;
       setIsLoading(true);
       setErrorMessage(null);
@@ -61,9 +44,9 @@ const useLibraryViewModel = () => {
           })
         )
         .subscribe({
-          next: (response: SongsListResponse) => {
+          next: (response: Paginated<Song>) => {
             console.log('[LibraryViewModel] Songs loaded:', response);
-            const songsData = response?.data?.data?.rows ?? [];
+            const songsData = response.rows ?? [];
             setSongs(songsData);
           },
           error: (error: Error) => {
@@ -113,9 +96,9 @@ const useLibraryViewModel = () => {
         })
       )
       .subscribe({
-        next: (response: SongsListResponse) => {
+        next: (response: Paginated<Song>) => {
           console.log('[LibraryViewModel] Library refreshed:', response);
-          const songsData = response?.data?.data?.rows ?? [];
+          const songsData = response.rows ?? [];
           setSongs(songsData);
         },
         error: (error: Error) => {

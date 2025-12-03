@@ -1,13 +1,13 @@
 import { ImageSourcePropType } from 'react-native';
 
 type User = {
-  id: string;
-  full_name: string;
+  id: number;
+  fullName: string;
   email: string;
   username: string;
   password: string;
-  profile_image: string | ImageSourcePropType;
-  favorite_instrument: number | UserInstrument;
+  profileImage: string | ImageSourcePropType;
+  favoriteInstrument: number | UserInstrument;
 };
 
 export default User;

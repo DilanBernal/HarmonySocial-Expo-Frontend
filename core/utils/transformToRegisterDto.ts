@@ -16,11 +16,11 @@ export const transformToRegisterDTO = (
   }
 
   return {
-    full_name: formData.fullName.trim(),
+    fullName: formData.fullName.trim(),
     email: formData.email.trim().toLowerCase(),
     username: formData.username.trim(),
     password: formData.password,
-    profile_image: formData.profileImage,
-    favorite_instrument: formData.favoriteInstrument,
+    profileImage: formData.profileImage,
+    favoriteInstrument: formData.favoriteInstrument,
   };
 };

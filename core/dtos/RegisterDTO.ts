@@ -5,10 +5,10 @@ import { UserInstrument } from '../models/data/User';
  * con la estructura esperada por el backend
  */
 export interface RegisterDTO {
-  full_name: string;
+  fullName: string;
   email: string;
   username: string;
   password: string;
-  profile_image: string;
-  favorite_instrument: UserInstrument;
+  profileImage: string;
+  favoriteInstrument: UserInstrument;
 }

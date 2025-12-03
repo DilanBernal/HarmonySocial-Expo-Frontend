@@ -11,12 +11,7 @@ import {
   View,
 } from 'react-native';
 
-/**
- * ProfileScreen - Uses ProfileViewModel for MVVM pattern compliance.
- * All business logic is handled by the ViewModel with RxJS.
- */
 export default function ProfileScreen() {
-  // Use the ViewModel for all state and logic
   const {
     profileImage,
     username,
