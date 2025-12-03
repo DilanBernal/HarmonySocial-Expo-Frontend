@@ -16,7 +16,7 @@ import {
 import { Step1BasicInfo } from './create-steps/step1-basic-info';
 import { Step2Content } from './create-steps/step2-content';
 import { Step3Review } from './create-steps/step3-review';
-import { postService } from '@/core/services/posts/PostService';
+import postService from '@/core/services/posts/PostService';
 import { getCurrentUserId } from '@/core/utils/getCurrentUserId';
 
 type MultiStepPostFormProps = {
@@ -88,13 +88,13 @@ export const MultiStepPostForm: React.FC<MultiStepPostFormProps> = ({
       console.log('[MultiStepPostForm] Submitting post:', payload);
 
       // Submit to API
-      const subscription = postService.createPost(payload).subscribe({
+      postService.createPost(payload).subscribe({
         next: (createdPost) => {
           console.log('[MultiStepPostForm] Post created successfully:', createdPost);
           setIsSubmitting(false);
           
           Alert.alert(
-            '¡Post Creado! 🎉',
+            '\u{00A1}Post Creado! \u{1F389}',
             'Tu post ha sido publicado exitosamente.',
             [
               {
@@ -126,9 +126,6 @@ export const MultiStepPostForm: React.FC<MultiStepPostFormProps> = ({
           );
         },
       });
-
-      // Cleanup subscription when component unmounts
-      return () => subscription.unsubscribe();
     } catch (error: any) {
       console.error('[MultiStepPostForm] Unexpected error:', error);
       setIsSubmitting(false);

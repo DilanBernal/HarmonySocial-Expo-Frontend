@@ -8,6 +8,7 @@ import AuthInterceptorRx from '@/core/http/interceptors/AuthInterceptorRx';
  * Service for post-related API operations
  */
 export class PostService {
+  private static instance: PostService;
   private httpClient;
   private axiosConfig;
 
@@ -21,6 +22,13 @@ export class PostService {
     this.httpClient = Axios.create(this.axiosConfig);
     // Add authentication interceptor
     this.httpClient.interceptors.request.use(AuthInterceptorRx);
+  }
+
+  public static getInstance(): PostService {
+    if (!PostService.instance) {
+      PostService.instance = new PostService();
+    }
+    return PostService.instance;
   }
 
   /**
@@ -47,4 +55,4 @@ export class PostService {
 }
 
 // Export singleton instance
-export const postService = new PostService();
+export default PostService.getInstance();

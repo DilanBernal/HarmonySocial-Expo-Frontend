@@ -131,7 +131,7 @@ export const Step1BasicInfo: React.FC<Step1BasicInfoProps> = ({
       />
 
       <View style={styles.infoBox}>
-        <Text style={styles.infoTitle}>💡 Consejos:</Text>
+        <Text style={styles.infoTitle}>{'\u{1F4A1}'} Consejos:</Text>
         <Text style={styles.infoText}>
           • Elige la categoría que mejor represente tu contenido{'\n'}
           • El título debe ser claro y atractivo{'\n'}

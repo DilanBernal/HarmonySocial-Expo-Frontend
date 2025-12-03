@@ -39,7 +39,7 @@ const CreatePostScreen = () => {
             <View style={styles.header}>
               <Text style={styles.title}>Crear Nuevo Post</Text>
               <Text style={styles.subtitle}>
-                Comparte tu música, ideas o contenido con la comunidad 🎵
+                Comparte tu música, ideas o contenido con la comunidad {'\u{1F3B5}'}
               </Text>
             </View>
 

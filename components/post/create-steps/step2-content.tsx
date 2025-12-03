@@ -307,7 +307,7 @@ export const Step2Content: React.FC<Step2ContentProps> = ({
       {renderCategoryContent()}
 
       <View style={styles.infoBox}>
-        <Text style={styles.infoTitle}>💡 Según tu categoría:</Text>
+        <Text style={styles.infoTitle}>{'\u{1F4A1}'} Según tu categoría:</Text>
         <Text style={styles.infoText}>
           {category === 'music' &&
             '• Selecciona la canción que quieres compartir\n• Explica por qué te gusta o qué significa para ti'}
