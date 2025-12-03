@@ -1,36 +1,25 @@
 import defaultColors from '@/assets/styles/colors/default';
 import { Ionicons } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import CreatePostScreen from './(tabs)/(post)/create-post';
-import FeedScreen from './(tabs)/feed';
-import LibraryScreen from './(tabs)/library';
-import ProfileScreen from './(tabs)/profile';
-import SearchScreen from './(tabs)/search/search-screen';
+import { Tabs } from 'expo-router';
 
-const Tab = createBottomTabNavigator();
 
 const MainLayout = () => {
   return (
-    <Tab.Navigator
-      initialRouteName="feed"
-      screenOptions={({ route }) => ({
+    <Tabs
+
+      screenOptions={() => ({
         sceneStyle: {
           backgroundColor: defaultColors.background,
         },
         headerShown: false,
-        tabBarStyle: {
-          borderTopWidth: 2,
-          elevation: 0,
-          backgroundColor: '#111418',
-        },
+        headerStyle: { backgroundColor: 'blue', height: 0 },
         tabBarBackground: () => null,
         tabBarActiveTintColor: '#7C4DFF',
         tabBarInactiveTintColor: '#9aa3b2',
       })}
     >
-      <Tab.Screen
+      <Tabs.Screen
         name="feed"
-        component={FeedScreen}
         options={{
           headerShown: false,
           title: 'Feed',
@@ -43,9 +32,8 @@ const MainLayout = () => {
           ),
         }}
       />
-      <Tab.Screen
+      <Tabs.Screen
         name="search"
-        component={SearchScreen}
         options={{
           headerShown: false,
           title: 'Busqueda',
@@ -58,9 +46,8 @@ const MainLayout = () => {
           ),
         }}
       />
-      <Tab.Screen
-        name="post"
-        component={CreatePostScreen}
+      <Tabs.Screen
+        name="(post)/create-post"
         options={{
           title: 'Crear nuevo post',
           tabBarIcon({ color, size, focused }) {
@@ -75,9 +62,9 @@ const MainLayout = () => {
         }}
       />
 
-      <Tab.Screen
+
+      <Tabs.Screen
         name="library"
-        component={LibraryScreen}
         options={{
           headerShown: false,
           title: 'Library',
@@ -91,9 +78,8 @@ const MainLayout = () => {
         }}
       />
 
-      <Tab.Screen
+      <Tabs.Screen
         name="profile"
-        component={ProfileScreen}
         options={{
           headerShown: false,
           title: 'Profile',
@@ -106,7 +92,7 @@ const MainLayout = () => {
           ),
         }}
       />
-    </Tab.Navigator>
+    </Tabs>
   );
 };
 

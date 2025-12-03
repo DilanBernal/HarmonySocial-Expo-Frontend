@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
@@ -8,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-
+import { Link, useRouter } from 'expo-router';
 import SearchBar from '@/components/general/search-bar';
 import useSearchViewModel from '@/core/viewmodels/search/search-view-model';
 import User from '@/core/models/data/User';
@@ -27,7 +26,8 @@ type Section =
  * All business logic is handled by the ViewModel with RxJS optimization.
  */
 export default function SearchScreen() {
-  const nav = useNavigation<any>();
+
+  const router = useRouter();
 
   // Use the ViewModel for all state and logic
   const {
@@ -139,7 +139,7 @@ export default function SearchScreen() {
       const a = item as Artist;
       return (
         <Pressable
-          onPress={() => nav.navigate('ArtistProfile', { artistId: a.id })}
+          onPress={() => router.navigate('/main/library')}
         >
           <View
             style={{ flexDirection: 'row', padding: 12, alignItems: 'center' }}
@@ -152,13 +152,16 @@ export default function SearchScreen() {
               {a.nombre}
             </Text>
           </View>
-        </Pressable>
+        </Pressable >
       );
     }
 
     const u = item as UserBasicData;
     return (
-      <Pressable onPress={() => nav.navigate('UserProfile', { userId: u.id })}>
+      <Pressable onPress={() => {
+        console.log("Mandando a la ruta")
+        router.navigate({ pathname: "/main/user-info/[id]", params: { id: u.username } }, {})
+      }}>
         <View
           style={{ flexDirection: 'row', padding: 12, alignItems: 'center' }}
         >
@@ -212,16 +215,18 @@ export default function SearchScreen() {
           </Text>
         </View>
       ) : (
-        <SectionList<any, any>
-          sections={sections}
-          keyExtractor={(item: any, idx) =>
-            String(item.id || item.title || idx)
-          }
-          renderItem={renderItem}
-          renderSectionHeader={renderSectionHeader}
-          renderSectionFooter={renderSectionFooter}
-          contentContainerStyle={{ paddingBottom: 32 }}
-        />
+        <Link href={'/main/(tabs)/library'} asChild>
+          <SectionList<any, any>
+            sections={sections}
+            keyExtractor={(item: any, idx) =>
+              String(item.id || item.title || idx)
+            }
+            renderItem={renderItem}
+            renderSectionHeader={renderSectionHeader}
+            renderSectionFooter={renderSectionFooter}
+            contentContainerStyle={{ paddingBottom: 32 }}
+          />
+        </Link>
       )}
     </View>
   );

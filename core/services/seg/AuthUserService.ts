@@ -6,8 +6,7 @@ import LoginDTO from '../../dtos/LoginDTO';
 import { RegisterDTO } from '../../dtos/RegisterDTO';
 import LoginResponse from '../../dtos/responses/LoginResponse';
 import UserBasicData from '../../dtos/user/UserBasicData';
-import { HttpResponse } from '../../types/HttpResponse';
-import { Axios, formToJSON } from 'rxjs-axios';
+import { Axios } from 'rxjs-axios';
 import AuthInterceptor from '@/core/http/interceptors/AuthInterceptor';
 
 
@@ -72,7 +71,7 @@ export class AuthUserService {
   getDataInfoFromAsyncStorage(): Observable<UserBasicData> {
     debugger;
     return from(AsyncStorage.getItem(this.ASYNC_STORAGE_USER_DATA_KEY)).pipe(map((value) => {
-      if (!value || value.trim() == "") {
+      if (!value || value.trim() === "") {
         throw new Error("No se pudo traer los datos del usuario");
       }
       const userDataFromJson: UserBasicData = JSON.parse(value);

@@ -1,5 +1,4 @@
-import { forkJoin, Observable, of, Subject } from 'rxjs';
-import { AxiosInstance } from 'axios';
+import { Observable, of, Subject } from 'rxjs';
 import {
   catchError,
   debounceTime,
@@ -8,9 +7,7 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import { Axios } from 'rxjs-axios';
-import { HttpResponse } from '@/core/types/HttpResponse';
 import SearchResponse from '@/core/models/data/SearchResposne';
-import User from '@/core/models/data/User';
 import Artist from '@/core/models/data/Artist';
 import { Song } from '@/core/models/data/Song';
 import UserBasicData from '@/core/dtos/user/UserBasicData';
@@ -73,9 +70,9 @@ export class SearchService {
         map((response) => {
           console.log(response);
           debugger;
-          const uRows: Array<UserBasicData> = response.users;
-          const aRows: Array<Artist> = response.artists;
-          const sRows: Array<Song> = response.songs;
+          const uRows: UserBasicData[] = response.users;
+          const aRows: Artist[] = response.artists;
+          const sRows: Song[] = response.songs;
 
           if (uRows.length >= 0 || aRows.length >= 0 || sRows.length >= 0) {
             console.log('[Search] Optimized results:', {

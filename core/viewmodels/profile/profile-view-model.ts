@@ -1,7 +1,7 @@
 import UserBasicData from '@/core/dtos/user/UserBasicData';
 import AuthUserService from '@/core/services/seg/AuthUserService';
-import { router } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subject, Subscription } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 
@@ -10,6 +10,7 @@ import { catchError, finalize, takeUntil } from 'rxjs/operators';
  * Uses RxJS for reactive data handling with proper cleanup.
  */
 const useProfileViewModel = () => {
+  const router = useRouter();
   const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
   const [username, setUsername] = useState<string>('');
   const [memberSince, setMemberSince] = useState<string>('');
@@ -107,7 +108,7 @@ const useProfileViewModel = () => {
       console.error('[ProfileViewModel] Error during logout:', error);
       setErrorMessage('Error al cerrar sesión.');
     }
-  }, [authUserService]);
+  }, [authUserService, router]);
 
   /**
    * Clears the error message.
