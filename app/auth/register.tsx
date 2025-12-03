@@ -45,9 +45,7 @@ export default function RegisterScreen() {
           {
             text: 'Continuar',
             onPress: () => {
-              // navigation.reset({
-              //   routes: [{ name: 'Login' }],
-              // });
+              router.replace("/auth/login");
             },
           },
         ]
@@ -95,7 +93,7 @@ export default function RegisterScreen() {
                 <Step
                   title="Datos Personales"
                   stepContainerStyle={{
-                    width: '82%',
+                    width: '78%',
                     justifyContent: 'center',
                     display: 'flex',
                   }}

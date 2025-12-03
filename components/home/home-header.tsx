@@ -69,13 +69,13 @@ const HomeHeader = () => {
           <Pressable android_ripple={{ color: '#ffffff22', borderless: true }}>
             <LinearGradient colors={['#7C4DFF', '#4C63F2']} style={s.storyRing}>
               <ProfileImage
-                image={item.profile_image}
+                image={item.profileImage}
                 onPress={() => router.navigate('/main/profile')}
                 imageStyle={s.storyImg}
               />
             </LinearGradient>
             <Text numberOfLines={1} style={s.storyName}>
-              {item.full_name}
+              {item.fullName}
             </Text>
           </Pressable>
         )}

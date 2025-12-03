@@ -11,16 +11,16 @@ import {
 
 import SearchBar from '@/components/general/search-bar';
 import useSearchViewModel from '@/core/viewmodels/search/search-view-model';
-import {
-  SearchArtist,
-  SearchSong,
-  SearchUser,
-} from '@/core/services/search/search-service';
+import User from '@/core/models/data/User';
+import Artist from '@/core/models/data/Artist';
+import { Song } from '@/core/models/data/Song';
+import ProfileImage from '@/components/general/profile-image';
+import UserBasicData from '@/core/dtos/user/UserBasicData';
 
 type Section =
-  | { title: 'Usuarios'; type: 'users'; data: SearchUser[] }
-  | { title: 'Artistas'; type: 'artists'; data: SearchArtist[] }
-  | { title: 'Canciones'; type: 'songs'; data: any };
+  | { title: 'Usuarios'; type: 'users'; data: User[] }
+  | { title: 'Artistas'; type: 'artists'; data: Artist[] }
+  | { title: 'Canciones'; type: 'songs'; data: Song[] };
 
 /**
  * SearchScreen - Uses SearchViewModel for MVVM pattern compliance.
@@ -103,7 +103,7 @@ export default function SearchScreen() {
 
   const renderItem = ({ item, section }: { item: any; section: Section }) => {
     if (section.type === 'songs') {
-      const s = item as SearchSong;
+      const s = item as Song;
       function playSong(arg0: { title: string; audioUrl: string }): void {
         throw new Error('Function not implemented.');
       }
@@ -136,7 +136,7 @@ export default function SearchScreen() {
     }
 
     if (section.type === 'artists') {
-      const a = item as SearchArtist;
+      const a = item as Artist;
       return (
         <Pressable
           onPress={() => nav.navigate('ArtistProfile', { artistId: a.id })}
@@ -145,29 +145,26 @@ export default function SearchScreen() {
             style={{ flexDirection: 'row', padding: 12, alignItems: 'center' }}
           >
             <Image
-              source={{ uri: a.avatarUrl || artistIcon }}
+              source={{ uri: artistIcon }}
               style={{ width: 44, height: 44, borderRadius: 22 }}
             />
             <Text style={{ color: '#fff', marginLeft: 10, fontWeight: '600' }}>
-              {a.name}
+              {a.nombre}
             </Text>
           </View>
         </Pressable>
       );
     }
 
-    const u = item as SearchUser;
+    const u = item as UserBasicData;
     return (
       <Pressable onPress={() => nav.navigate('UserProfile', { userId: u.id })}>
         <View
           style={{ flexDirection: 'row', padding: 12, alignItems: 'center' }}
         >
-          <Image
-            source={{ uri: u.avatarUrl || userIcon }}
-            style={{ width: 44, height: 44, borderRadius: 22 }}
-          />
+          <ProfileImage image={u.profileImageUrl} imageStyle={{ width: 44, height: 44, borderRadius: 22 }} />
           <Text style={{ color: '#fff', marginLeft: 10, fontWeight: '600' }}>
-            {u.name}
+            {u.username}
           </Text>
         </View>
       </Pressable>
@@ -215,7 +212,7 @@ export default function SearchScreen() {
           </Text>
         </View>
       ) : (
-        <SectionList
+        <SectionList<any, any>
           sections={sections}
           keyExtractor={(item: any, idx) =>
             String(item.id || item.title || idx)

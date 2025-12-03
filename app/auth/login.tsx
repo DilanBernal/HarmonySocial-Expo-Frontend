@@ -1,6 +1,7 @@
 import { EqBars } from '@/components/general/eq-bars';
 import AuthUserService from '@/core/services/seg/AuthUserService';
 import useLoginViewModel from '@/core/viewmodels/auth/login-view-model';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -155,7 +156,7 @@ const LoginScreen = () => {
                       )}
                     ></Controller>
 
-                    <Text style={[styles.label, styles.mt14]}>Password</Text>
+                    <Text style={[styles.label, styles.mt14]}>Contraseña</Text>
                     <Controller
                       control={control}
                       name="password"
@@ -195,9 +196,8 @@ const LoginScreen = () => {
                                 borderless: true,
                               }}
                             >
-                              <Text style={styles.affixText}>
-                                {showPassword ? 'Ocultar' : 'Mostrar'}
-                              </Text>
+                              <Ionicons size={30} name={showPassword ? 'eye-off' : 'eye'} style={styles.affixIcon} />
+
                             </Pressable>
                           </View>
                           {fieldState.error && !!errors.password && (
@@ -375,12 +375,14 @@ export const styles = StyleSheet.create({
   affix: {
     position: 'absolute',
     right: 10,
-    top: 8,
+    top: "50%",
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    transform: [{
+      "translateY": "-50%"
+    }, { "translateY": "5%" }],
     borderRadius: 10,
   },
-  affixText: { color: '#9AA3B2', fontWeight: '600' },
+  affixIcon: { color: '#9AA3B2' },
   errorText: { color: '#EF4444', marginTop: 6, fontSize: 12 },
 
   buttonsRow: { flexDirection: 'row', gap: 12, marginTop: 22 },

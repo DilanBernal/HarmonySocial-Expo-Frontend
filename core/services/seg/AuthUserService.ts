@@ -107,13 +107,11 @@ export class AuthUserService {
 
     let userData: UserBasicData = {
       id: setIdToSearch(),
-      fullName: partialUserData?.full_name ?? '',
-      email: partialUserData?.email ?? '',
       activeFrom: 0,
-      profileImage: loginResponse?.data.profile_image ?? '',
+      profileImageUrl: loginResponse?.data.profile_image ?? '',
       username: partialUserData?.username ?? '',
       learningPoints: 0,
-      favoriteInstrument: partialUserData?.favorite_instrument ?? -1,
+      favoriteInstrument: partialUserData?.favoriteInstrument ?? -1,
     };
 
 
@@ -126,7 +124,6 @@ export class AuthUserService {
 
     if (loginResponse) {
       this.setTokenInAsyncStorage(loginResponse.data.token);
-      debugger;
     }
 
 

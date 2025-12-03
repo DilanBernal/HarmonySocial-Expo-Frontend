@@ -6,6 +6,7 @@ import { UseRegisterViewModelReturn } from '@/core/types/viewmodels/RegisterView
 import { transformToRegisterDTO } from '@/core/utils/transformToRegisterDto';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
+import { firstValueFrom } from 'rxjs';
 
 export const useRegisterViewModel = (): UseRegisterViewModelReturn => {
   const {
@@ -22,10 +23,9 @@ export const useRegisterViewModel = (): UseRegisterViewModelReturn => {
     delayError: 0,
   });
 
-  const UserService: AuthUserService = new AuthUserService();
+  const UserService = AuthUserService;
 
   const onSubmit = async () => {
-    console.log('sending register petition');
     try {
       const userRegisterForm: RegisterFormData = {
         fullName: getValues('fullName'),
@@ -38,10 +38,12 @@ export const useRegisterViewModel = (): UseRegisterViewModelReturn => {
       };
       const userDTO: RegisterDTO = transformToRegisterDTO(userRegisterForm);
 
-      const serviceResponse = await UserService.register(userDTO);
+      const serviceResponse = await firstValueFrom(UserService.register(userDTO));
 
       console.log(serviceResponse);
     } catch (error) {
+      debugger;
+
       console.error(error);
       throw error;
     }
