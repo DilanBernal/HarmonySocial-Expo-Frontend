@@ -26,7 +26,7 @@ const useProfileViewModel = () => {
 
   const updateProfileState = useCallback((userData: UserBasicData) => {
     setUsername(userData.username || '');
-    setProfileImage((userData as any).profileImage);
+    setProfileImage(userData.profileImage);
     setMemberSince(String(userData.activeFrom || ''));
     setLearningPoints(userData.learningPoints);
   }, []);

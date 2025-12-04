@@ -107,7 +107,7 @@ export class AuthUserService {
     let userData: UserBasicData = {
       id: setIdToSearch(),
       activeFrom: 0,
-      profileImageUrl: loginResponse?.data.profile_image ?? '',
+      profileImage: loginResponse?.data.profile_image ?? '',
       username: partialUserData?.username ?? '',
       learningPoints: 0,
       favoriteInstrument: partialUserData?.favoriteInstrument ?? -1,
