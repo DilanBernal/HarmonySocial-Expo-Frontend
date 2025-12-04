@@ -165,7 +165,7 @@ export default function SearchScreen() {
         <View
           style={{ flexDirection: 'row', padding: 12, alignItems: 'center' }}
         >
-          <ProfileImage image={u.profileImageUrl} imageStyle={{ width: 44, height: 44, borderRadius: 22 }} />
+          <ProfileImage image={u.profileImage} imageStyle={{ width: 44, height: 44, borderRadius: 22 }} />
           <Text style={{ color: '#fff', marginLeft: 10, fontWeight: '600' }}>
             {u.username}
           </Text>

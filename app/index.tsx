@@ -4,7 +4,7 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 
 export default function HomeScreen() {
   useEffect(() => {
-    if (Platform.OS === 'web') {
+    if (Platform.OS === 'web' || Platform.OS === 'ios') {
       const timer = setTimeout(() => {
         router.replace('/auth/login');
       }, 1500);
@@ -17,8 +17,6 @@ export default function HomeScreen() {
   };
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>¡Hola Mundo!</Text>
-      <Text style={styles.subtitle}>Tu proyecto limpio está listo</Text>
       {Platform.OS !== 'web' && (
         <Text onPress={handleNavigate}>Ir a autenticacion</Text>
       )}
